@@ -31,6 +31,7 @@ import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.utils.Handler;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
+import fr.vmarchaud.mineweb.utils.http.RoutedHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 
 public class BukkitCore extends JavaPlugin implements ICore {
@@ -41,22 +42,44 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	@Override
 	public void onEnable() {
 		// Init
-		httpRouter = new RouteMatcher();
 		injector = new BukkitNettyInjector(this);
 		injector.inject();
+		httpRouter = new RouteMatcher();
 	}
 
 	@Override
 	public void registerRoutes() {
-		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
-
-			@Override
-			public FullHttpResponse handle(RoutedHttpRequest event) {
-				return new HttpResponseBuilder().text("Hello world").build();
-			}
+		httpRouter.everyMatch(new Handler<Void, RoutedHttpResponse>() {
 			
+			@Override
+			public Void handle(RoutedHttpResponse event) {
+				System.out.println("[JSONAPI] [HTTP] " +
+						event.getRes().getStatus().code() + " " +
+						event.getRequest().getMethod().toString() + " " +
+						event.getRequest().getUri());
+				return null;
+			}
 		});
+
+		System.out.println(httpRouter.hashCode());
 		
+		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
+            @Override
+            public FullHttpResponse handle(RoutedHttpRequest event) {
+                return new HttpResponseBuilder().text("hello world").build();
+            }
+        });
+		
+		httpRouter.noMatch(new Handler<FullHttpResponse, RoutedHttpRequest>() {
+			
+			@Override
+			public FullHttpResponse handle(RoutedHttpRequest request) {
+				System.out.println("[JSONAPI] [HTTP] " +
+						request.getRequest().getMethod().toString() + " " +
+						request.getRequest().getUri());
+				return null;
+			}
+		});
 	}
 
 	@Override

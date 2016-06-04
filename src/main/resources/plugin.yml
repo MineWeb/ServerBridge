@@ -1,0 +1,4 @@
+name: MinewebBridge
+main: fr.vmarchaud.mineweb.bukkit.BukkitCore
+version: 1.0
+author: ThisIsMac
