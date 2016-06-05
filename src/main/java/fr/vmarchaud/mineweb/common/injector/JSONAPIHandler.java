@@ -37,7 +37,6 @@ class JSONAPIHandler extends SimpleChannelInboundHandler<Object> {
 			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
 			return;
 		}
-		System.out.println("test");
 		api.getHTTPRouter().serveRequest(ctx, req);
 	}
 

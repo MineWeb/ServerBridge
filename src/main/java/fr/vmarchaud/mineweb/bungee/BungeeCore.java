@@ -23,6 +23,73 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
-public class BungeeCore {
+import java.util.concurrent.TimeUnit;
+
+import fr.vmarchaud.mineweb.common.ICore;
+import fr.vmarchaud.mineweb.common.injector.NettyInjector;
+import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
+import fr.vmarchaud.mineweb.utils.Handler;
+import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
+import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
+import fr.vmarchaud.mineweb.utils.http.RoutedHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import net.md_5.bungee.api.plugin.Plugin;
+
+public class BungeeCore extends Plugin implements ICore {
+	
+
+	RouteMatcher			httpRouter;
+	NettyInjector			injector;
+	
+	public void onEnable() {
+		// Init
+		injector = new BungeeNettyInjector(this);
+		httpRouter = new RouteMatcher();
+		
+		// schedule the injection to ensure that channel are setup
+		getProxy().getScheduler().schedule(this, new Runnable() {
+
+			@Override
+			public void run() {
+				injector.inject();
+				registerRoutes();
+			}
+			
+		}, 2, TimeUnit.SECONDS);
+		
+	}
+
+	public void registerRoutes() {
+		httpRouter.everyMatch(new Handler<Void, RoutedHttpResponse>() {
+			
+			@Override
+			public Void handle(RoutedHttpResponse event) {
+				System.out.println("[HTTP] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
+				return null;
+			}
+		});
+		
+		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
+            @Override
+            public FullHttpResponse handle(RoutedHttpRequest event) {
+                return new HttpResponseBuilder().text("hello world").build();
+            }
+        });
+	}
+
+	@Override
+	public RouteMatcher getHTTPRouter() {
+		return httpRouter;
+	}
+
+	@Override
+	public Object getServer() {
+		return this.getProxy();
+	}
+
+	@Override
+	public Object getPlugin() {
+		return this;
+	}
 
 }

@@ -23,18 +23,21 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bukkit;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import com.comphenix.protocol.reflect.FuzzyReflection;
 import com.comphenix.protocol.reflect.VolatileField;
 import com.comphenix.protocol.utility.MinecraftReflection;
+import com.google.common.collect.Lists;
 
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.JSONAPIChannelDecoder;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.utils.BootstrapList;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
@@ -42,6 +45,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 
 public class BukkitNettyInjector extends NettyInjector {
+
+    // The temporary player factory
+	protected List<VolatileField> bootstrapFields = Lists.newArrayList();
+   
+    // List of network managers
+	protected volatile List<Object> networkManagers;
 	
 	private ICore			api;
 	
@@ -127,5 +136,46 @@ public class BukkitNettyInjector extends NettyInjector {
 	protected void injectChannel(Channel channel) {
 		channel.pipeline().addFirst(new JSONAPIChannelDecoder(api));
 	}
+	
+	/**
+     * Retrieve a list of every field with a list of channel futures.
+     * @param serverConnection - the connection.
+     * @return List of fields.
+     */
+    protected List<VolatileField> getBootstrapFields(Object serverConnection) {
+        List<VolatileField> result = Lists.newArrayList();
+        
+        // Find and (possibly) proxy every list
+        for (Field field : FuzzyReflection.fromObject(serverConnection, true).getFieldListByType(List.class)) {
+            VolatileField volatileField = new VolatileField(field, serverConnection, true).toSynchronized();
+            
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>) volatileField.getValue();
+            
+            if (list.size() == 0 || list.get(0) instanceof ChannelFuture) {
+                result.add(volatileField);
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Clean up any remaning injections.
+     */
+    public synchronized void close() {
+        if (!closed) {
+            closed = true;
+
+            for (VolatileField field : bootstrapFields) {
+                Object value = field.getValue();
+
+                // Undo the processed channels, if any 
+                if (value instanceof BootstrapList) {
+                    ((BootstrapList) value).close();
+                }
+                field.revertValue();
+            }
+        }
+    }
 
 }

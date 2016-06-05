@@ -486,7 +486,6 @@ public class RouteMatcher extends SimpleChannelInboundHandler<FullHttpRequest> {
 			}
 		}
 		
-		System.out.println(noMatchHandler);
 		if (noMatchHandler != null) {
 			return noMatchHandler.handle(rreq);
 		}
@@ -497,8 +496,6 @@ public class RouteMatcher extends SimpleChannelInboundHandler<FullHttpRequest> {
 	private boolean route(ChannelHandlerContext ctx, FullHttpRequest request, List<PatternBinding> bindings) {
 		FullHttpResponse res = getResponseForRoute(ctx, request, bindings);
 		sendHttpResponse(ctx, request, res);
-		
-		System.out.println(noMatchHandler);
 		
 		if (everyMatchHandler != null) {
 			everyMatchHandler.handle(new RoutedHttpResponse(request, res));

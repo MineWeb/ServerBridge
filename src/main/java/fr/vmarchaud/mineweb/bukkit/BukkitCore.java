@@ -45,23 +45,18 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		injector = new BukkitNettyInjector(this);
 		injector.inject();
 		httpRouter = new RouteMatcher();
+		registerRoutes();
 	}
 
-	@Override
 	public void registerRoutes() {
 		httpRouter.everyMatch(new Handler<Void, RoutedHttpResponse>() {
 			
 			@Override
 			public Void handle(RoutedHttpResponse event) {
-				System.out.println("[JSONAPI] [HTTP] " +
-						event.getRes().getStatus().code() + " " +
-						event.getRequest().getMethod().toString() + " " +
-						event.getRequest().getUri());
+				System.out.println("[HTTP] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
 				return null;
 			}
 		});
-
-		System.out.println(httpRouter.hashCode());
 		
 		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
             @Override
@@ -69,22 +64,16 @@ public class BukkitCore extends JavaPlugin implements ICore {
                 return new HttpResponseBuilder().text("hello world").build();
             }
         });
-		
-		httpRouter.noMatch(new Handler<FullHttpResponse, RoutedHttpRequest>() {
-			
-			@Override
-			public FullHttpResponse handle(RoutedHttpRequest request) {
-				System.out.println("[JSONAPI] [HTTP] " +
-						request.getRequest().getMethod().toString() + " " +
-						request.getRequest().getUri());
-				return null;
-			}
-		});
 	}
 
 	@Override
 	public RouteMatcher getHTTPRouter() {
 		return httpRouter;
+	}
+
+	@Override
+	public Object getPlugin() {
+		return this;
 	}
 
 }

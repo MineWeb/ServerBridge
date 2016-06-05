@@ -26,6 +26,9 @@ package fr.vmarchaud.mineweb.common;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 
 public interface ICore {
-	public void 			registerRoutes();
 	public RouteMatcher		getHTTPRouter();
+	
+	public Object			getServer();
+	
+	public Object			getPlugin();
 }

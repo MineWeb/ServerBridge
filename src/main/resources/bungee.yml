@@ -1,0 +1,4 @@
+name: MinewebBridge
+main: fr.vmarchaud.mineweb.bungee.BungeeCore
+version: 1.0
+author: ThisIsMac

@@ -7,8 +7,8 @@ version = '0.0.1-SNAPSHOT'
 
 description = "mineweb-bridge"
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
 	mavenLocal()
@@ -23,7 +23,7 @@ dependencies {
 	}
     compileOnly "org.spigotmc:spigot:1.8-R0.1-SNAPSHOT"
     compileOnly "org.projectlombok:lombok:1.16.6"
-    compileOnly "net.md-5:bungeecord-api:1.8-SNAPSHOT"
+    compileOnly "net.md-5:bungeecord-bootstrap:1.8-SNAPSHOT"
 }
 
 task fatJar(type: Jar) {

@@ -23,11 +23,13 @@ public class JSONAPIChannelDecoder extends ByteToMessageDecoder {
 	
 	@Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> list) throws Exception {
+        System.out.println("test");
         // use 4 bytes to detect HTTP or abort
         if (buf.readableBytes() < 4) {
             return;
         }
         buf.retain(2);
+        
 
         final int magic1 = buf.getUnsignedByte(buf.readerIndex());
         final int magic2 = buf.getUnsignedByte(buf.readerIndex() + 1);
@@ -53,6 +55,7 @@ public class JSONAPIChannelDecoder extends ByteToMessageDecoder {
             buf.release();
             buf.release();
         } else {
+        	// this is not a http channel so just remove our channel handler
             try {
                 p.remove(this);
             } catch (NoSuchElementException e) {
