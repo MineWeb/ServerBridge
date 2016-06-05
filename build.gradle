@@ -1,0 +1,37 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+group = 'fr.vmarchaud'
+version = '0.0.1-SNAPSHOT'
+
+description = "mineweb-bridge"
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+repositories {
+	mavenLocal()
+    maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
+    maven { url "http://repo.dmulloy2.net/content/groups/public/" }
+	mavenCentral()
+}
+dependencies {
+    compile "com.google.code.gson:gson:2.5"
+    compile ("com.comphenix.protocol:ProtocolLib-API:4.0-SNAPSHOT") { 
+		exclude group: "com.comphenix.executors" 
+	}
+    compileOnly "org.spigotmc:spigot:1.8-R0.1-SNAPSHOT"
+    compileOnly "org.projectlombok:lombok:1.16.6"
+    compileOnly "net.md-5:bungeecord-api:1.8-SNAPSHOT"
+}
+
+task fatJar(type: Jar) {
+    baseName = project.name + '_all'
+    from {
+    	configurations.compile.collect {
+    		it.isDirectory() ? it : zipTree(it)
+    	}
+    }
+    with jar
+}

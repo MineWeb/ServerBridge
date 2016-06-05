@@ -4,3 +4,6 @@
 .classpath
 *.class
 /target/
+.gradle
+gradle/
+build/
