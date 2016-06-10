@@ -5,7 +5,7 @@ apply plugin: 'maven'
 group = 'fr.vmarchaud'
 version = '0.0.1-SNAPSHOT'
 
-description = "mineweb-bridge"
+description = "mineweb_bridge"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -15,6 +15,7 @@ repositories {
     maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
     maven { url "http://repo.dmulloy2.net/content/groups/public/" }
 	mavenCentral()
+	jcenter()
 }
 dependencies {
     compile "com.google.code.gson:gson:2.5"
@@ -34,4 +35,20 @@ task fatJar(type: Jar) {
     	}
     }
     with jar
+}
+
+task moveIntoBukkit(type: Copy) {
+	from "build/libs"
+	into '../_SERVER/plugins'
+	rename { String fileName ->
+		fileName.replace("mineweb_all-0.0.1-SNAPSHOT", "mineweb_bridge.jar")
+	}
+}
+
+task moveIntoBungee(type: Copy) {
+	from "build/libs"
+	into '../_BUNGEE/plugins'
+	rename { String fileName ->
+		fileName.replace("mineweb_all-0.0.1-SNAPSHOT", "mineweb_bridge.jar")
+	}
 }

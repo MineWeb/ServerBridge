@@ -23,17 +23,12 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.concurrent.TimeUnit;
-
 import fr.vmarchaud.mineweb.common.ICore;
-import fr.vmarchaud.mineweb.common.injector.JSONAPIChannelDecoder;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import io.netty.channel.Channel;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.netty.HandlerBoss;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
 
 public class BungeeNettyInjector extends NettyInjector {
 	
@@ -43,25 +38,16 @@ public class BungeeNettyInjector extends NettyInjector {
 		this.api = api;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public synchronized void inject() {
         if (injected)
             throw new IllegalStateException("Cannot inject twice.");
+        
         try {
-            Class<?> server = api.getServer().getClass();
-            
-            Field listenersList = server.getDeclaredField("listeners");
-            listenersList.setAccessible(true);
-            
-            HashSet<Channel> listeners = (HashSet<Channel>)listenersList.get(api.getServer());
-            
-            for(Channel ch : listeners) {
-            	System.out.println(ch.pipeline().first());
-            	injectChannel(ch);
-                System.out.println("succesfuly injected");
-            	
-            }
-            
+        	ClassPool pool = ClassPool.getDefault();
+        	CtClass ctClass = pool.get("net.md_5.bungee.BungeeCord");
+        	CtMethod method = ctClass.getDeclaredMethod("startListeners");
+             method.setBody("{\n System.out.println(\"Hello!!! This is the Modified version!!!\");\n } ");
+        	ctClass.writeFile();
             injected = true;
             
         } catch (Exception e) {
@@ -70,22 +56,6 @@ public class BungeeNettyInjector extends NettyInjector {
     }
 
 	@Override
-	protected void injectChannel(final Channel channel) {
-		channel.pipeline().forEach(System.out::println);
-		
-		channel.pipeline().addFirst(new JSONAPIChannelDecoder(api));
-		
-    	System.out.println(channel.pipeline().first());
-    	
-    	ProxyServer	server = (ProxyServer) api.getServer();
-    	server.getScheduler().schedule((Plugin) api.getPlugin(), new Runnable(){
-
-			@Override
-			public void run() {
-		    	channel.disconnect();
-			}
-    		
-    	}, 10, TimeUnit.SECONDS);
-	}
+	protected void injectChannel(final Channel channel) { }
 
 }

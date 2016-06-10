@@ -23,8 +23,6 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
-import java.util.concurrent.TimeUnit;
-
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
@@ -38,24 +36,22 @@ import net.md_5.bungee.api.plugin.Plugin;
 public class BungeeCore extends Plugin implements ICore {
 	
 
+	public static ICore		instance;
+	public static ICore get() {
+		return instance;
+	}
+
 	RouteMatcher			httpRouter;
 	NettyInjector			injector;
 	
 	public void onEnable() {
+		instance = this;
+		
 		// Init
 		injector = new BungeeNettyInjector(this);
 		httpRouter = new RouteMatcher();
-		
-		// schedule the injection to ensure that channel are setup
-		getProxy().getScheduler().schedule(this, new Runnable() {
-
-			@Override
-			public void run() {
-				injector.inject();
-				registerRoutes();
-			}
-			
-		}, 2, TimeUnit.SECONDS);
+		registerRoutes();
+		injector.inject();
 		
 	}
 
