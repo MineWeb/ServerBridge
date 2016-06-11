@@ -79,13 +79,19 @@ public class BungeeCore extends Plugin implements ICore {
 	}
 
 	@Override
-	public Object getServer() {
+	public Object getGameServer() {
 		return this.getProxy();
 	}
 
 	@Override
 	public Object getPlugin() {
 		return this;
+	}
+	
+
+	@Override
+	public EnumPluginType getType() {
+		return EnumPluginType.BUNGEE;
 	}
 
 }

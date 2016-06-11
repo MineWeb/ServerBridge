@@ -76,4 +76,14 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		return this;
 	}
 
+	@Override
+	public EnumPluginType getType() {
+		return EnumPluginType.BUKKIT;
+	}
+
+	@Override
+	public Object getGameServer() {
+		return this.getServer();
+	}
+
 }

@@ -26,9 +26,33 @@ package fr.vmarchaud.mineweb.common;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 
 public interface ICore {
+	
+	/**
+	 * Get the router that handle http connection
+	 * @return RouteMatcher
+	 */
 	public RouteMatcher		getHTTPRouter();
 	
-	public Object			getServer();
+	/**
+	 * Get the game server instance
+	 * @return ProxyServer for bungee OR Server for bukkit
+	 */
+	public Object			getGameServer();
 	
+	/**
+	 * Get the plugin instance
+	 * @return Plugin instance for bungee OR JavaPlugin for bukkit
+	 */
 	public Object			getPlugin();
+	
+	/**
+	 * Get the type of plugin that is running
+	 * @return EnumPluginType
+	 */
+	public EnumPluginType	getType();
+	
+	
+	public enum EnumPluginType {
+		BUKKIT, BUNGEE;
+	}
 }

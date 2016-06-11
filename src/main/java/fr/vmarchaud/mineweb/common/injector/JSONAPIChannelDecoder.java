@@ -23,7 +23,6 @@ public class JSONAPIChannelDecoder extends ByteToMessageDecoder {
 	
 	@Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> list) throws Exception {
-        System.out.println("test");
         // use 4 bytes to detect HTTP or abort
         if (buf.readableBytes() < 4) {
             return;

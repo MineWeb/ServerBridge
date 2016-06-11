@@ -23,39 +23,71 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 import fr.vmarchaud.mineweb.common.ICore;
+import fr.vmarchaud.mineweb.common.injector.JSONAPIChannelDecoder;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import io.netty.channel.Channel;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
+import io.netty.channel.ChannelInitializer;
+import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.connection.InitialHandler;
+import net.md_5.bungee.netty.HandlerBoss;
+import net.md_5.bungee.netty.PipelineUtils;
+import net.md_5.bungee.protocol.KickStringWriter;
+import net.md_5.bungee.protocol.LegacyDecoder;
+import net.md_5.bungee.protocol.MinecraftDecoder;
+import net.md_5.bungee.protocol.MinecraftEncoder;
+import net.md_5.bungee.protocol.Protocol;
 
 public class BungeeNettyInjector extends NettyInjector {
-	
-	private ICore			api;
-	
+
+	private ICore api;
+
 	public BungeeNettyInjector(ICore api) {
 		this.api = api;
 	}
-	
+
 	public synchronized void inject() {
-        if (injected)
-            throw new IllegalStateException("Cannot inject twice.");
-        
-        try {
-        	ClassPool pool = ClassPool.getDefault();
-        	CtClass ctClass = pool.get("net.md_5.bungee.BungeeCord");
-        	CtMethod method = ctClass.getDeclaredMethod("startListeners");
-             method.setBody("{\n System.out.println(\"Hello!!! This is the Modified version!!!\");\n } ");
-        	ctClass.writeFile();
-            injected = true;
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to inject channel futures.", e);
-        }
-    }
+		if (injected)
+			throw new IllegalStateException("Cannot inject twice.");
+
+		try {
+			// get the field that will setup the channel and inject our handler
+			Class<PipelineUtils> server = PipelineUtils.class;
+			Field field = server.getDeclaredField("SERVER_CHILD");
+			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+			// set the new value
+			field.set(null, new ChannelInitializer<Channel>() {
+				
+				@SuppressWarnings("deprecation")
+				protected void initChannel(Channel ch) throws Exception {
+					// inject here
+					injectChannel(ch);
+					
+					// and let the original code run
+					PipelineUtils.BASE.initChannel(ch);
+					ch.pipeline().addBefore(PipelineUtils.FRAME_DECODER, PipelineUtils.LEGACY_DECODER, new LegacyDecoder());
+					ch.pipeline().addAfter(PipelineUtils.FRAME_DECODER, PipelineUtils.PACKET_DECODER, new MinecraftDecoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
+					ch.pipeline().addAfter(PipelineUtils.FRAME_PREPENDER, PipelineUtils.PACKET_ENCODER, new MinecraftEncoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
+					ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, new KickStringWriter());
+					ch.pipeline().get(HandlerBoss.class) .setHandler(new InitialHandler(BungeeCord.getInstance(), ch.attr( PipelineUtils.LISTENER ).get()));
+				}
+			});
+			injected = true;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to inject channel futures.", e);
+		}
+	}
 
 	@Override
-	protected void injectChannel(final Channel channel) { }
-
+	protected void injectChannel(final Channel channel) {
+		channel.pipeline().addFirst(new JSONAPIChannelDecoder(api));
+	}
 }
