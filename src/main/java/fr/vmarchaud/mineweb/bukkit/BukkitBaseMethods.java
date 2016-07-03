@@ -1,15 +1,14 @@
 package fr.vmarchaud.mineweb.bukkit;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.bukkit.BanEntry;
+import org.bukkit.BanList.Type;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
 
-import com.mysql.fabric.xmlrpc.base.Array;
+import com.google.gson.JsonObject;
 
 import fr.vmarchaud.mineweb.common.IBaseMethods;
 import fr.vmarchaud.mineweb.common.ICore;
@@ -26,7 +25,7 @@ public class BukkitBaseMethods implements IBaseMethods {
 
 	@Override
 	public int getPlayers() {
-		return getPlayerList().size();
+		return api.getPlayers().size();
 	}
 
 	@Override
@@ -36,8 +35,8 @@ public class BukkitBaseMethods implements IBaseMethods {
 
 	@Override
 	public boolean isConnected(String name) {
-		for(Player player : getPlayerList()) {
-			if (player.getName().equals(name))
+		for(String player : api.getPlayers()) {
+			if (player.equals(name))
 				return true;
 		}
 		return false;
@@ -53,23 +52,38 @@ public class BukkitBaseMethods implements IBaseMethods {
 		return server.getBukkitVersion();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<Player> getPlayerList() {
-		List<Player>	players = new ArrayList<Player>();
-		try {
-			Method getCount = server.getClass().getMethod("getOnlinePlayers");
-			
-			// add all player into our list
-			if (getCount.getReturnType() == Array.class) 
-				players.addAll(Arrays.asList((Player[]) getCount.invoke(server)));
-			else
-				players.addAll((Collection<? extends Player>) getCount.invoke(server));
-			
-		// silent cause we are sure that at least one exist
-		} catch (Exception e) {} 
+	public Set<String> getPlayerList() {
+		return api.getPlayers();
+	}
+
+	@Override
+	public String getMOTD() {
+		return server.getMotd();
+	}
+
+	@Override
+	public Set<String> getWhitelist() {
+		Set<String>	whitelisted = new HashSet<String>();
+		for(OfflinePlayer player : server.getWhitelistedPlayers())
+			whitelisted.add(player.getName());
+		return whitelisted;
+	}
+
+	@Override
+	public Set<JsonObject> getBannedlist() {
+		Set<JsonObject>	banned = new HashSet<JsonObject>();
 		
-		return players;
+		for(BanEntry entry : server.getBanList(Type.NAME).getBanEntries()) {
+			JsonObject object = new JsonObject();
+			object.addProperty("player", entry.getTarget());
+			object.addProperty("by", entry.getSource());
+			object.addProperty("for", entry.getReason());
+			object.addProperty("at", entry.getCreated().getTime());
+			object.addProperty("until", entry.getExpiration().getTime());
+			banned.add(object);
+		}
+		return banned;
 	}
 
 }

@@ -23,9 +23,16 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
+import fr.vmarchaud.mineweb.common.IBaseMethods;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
+import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.Handler;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
@@ -41,18 +48,33 @@ public class BungeeCore extends Plugin implements ICore {
 		return instance;
 	}
 
-	RouteMatcher			httpRouter;
-	NettyInjector			injector;
+	private RouteMatcher			httpRouter;
+	private NettyInjector			injector;
+	
+	/** Cached player list to not rely on Reflection on every request **/
+	private HashSet<String>			players;
+	
+	private IBaseMethods			methods;
+	private Logger					logger		= Logger.getLogger("Mineweb");
 	
 	public void onEnable() {
 		instance = this;
+		// directly setup logger
+		setupLogger();
 		
 		// Init
+		logger.info("Loading ...");
 		injector = new BungeeNettyInjector(this);
 		httpRouter = new RouteMatcher();
+		methods = new BungeeBaseMethods(instance);
+		logger.info("Registering route ...");
 		registerRoutes();
-		injector.inject();
+		getProxy().getPluginManager().registerListener(this, new BungeeListeners(instance));
 		
+		// inject when we are ready
+		logger.info("Injecting http server ...");
+		injector.inject();
+		logger.info("Ready !");
 	}
 
 	public void registerRoutes() {
@@ -60,7 +82,7 @@ public class BungeeCore extends Plugin implements ICore {
 			
 			@Override
 			public Void handle(RoutedHttpResponse event) {
-				System.out.println("[HTTP] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
+				logger.fine("[HTTP Request] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
 				return null;
 			}
 		});
@@ -68,9 +90,22 @@ public class BungeeCore extends Plugin implements ICore {
 		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
             @Override
             public FullHttpResponse handle(RoutedHttpRequest event) {
-                return new HttpResponseBuilder().text("hello world").build();
+                return new HttpResponseBuilder().text("mineweb_bridge").build();
             }
         });
+	}
+	
+	public void setupLogger() {
+		try {
+			logger.setUseParentHandlers(false);
+			FileHandler		fileHandler = new FileHandler(getDataFolder() + "/" + getDescription().getName() + "/" + "mineweb.log");
+			fileHandler.setFormatter(new CustomLogFormatter());
+			logger.addHandler(fileHandler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -88,10 +123,19 @@ public class BungeeCore extends Plugin implements ICore {
 		return this;
 	}
 	
-
 	@Override
 	public EnumPluginType getType() {
 		return EnumPluginType.BUNGEE;
+	}
+
+	@Override
+	public HashSet<String> getPlayers() {
+		return players;
+	}
+	
+	@Override
+	public Logger logger() {
+		return logger;
 	}
 
 }

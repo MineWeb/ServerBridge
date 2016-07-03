@@ -23,11 +23,19 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bukkit;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.vmarchaud.mineweb.common.IBaseMethods;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
+import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.Handler;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
@@ -36,16 +44,41 @@ import io.netty.handler.codec.http.FullHttpResponse;
 
 public class BukkitCore extends JavaPlugin implements ICore {
 	
-	RouteMatcher			httpRouter;
-	NettyInjector			injector;
+	public static ICore		instance;
+	public static ICore get() {
+		return instance;
+	}
+	
+	
+	private RouteMatcher			httpRouter;
+	private NettyInjector			injector;
+	
+	/** Cached player list to not rely on Reflection on every request **/
+	private HashSet<String>			players;
+	
+	private IBaseMethods			methods;
+	private Logger					logger		= Logger.getLogger("Mineweb");
 	
 	@Override
 	public void onEnable() {
+		instance = this;
+		// directly setup logger
+		setupLogger();
+		
 		// Init
+		logger.info("Loading ...");
 		injector = new BukkitNettyInjector(this);
-		injector.inject();
 		httpRouter = new RouteMatcher();
+		methods = new BukkitBaseMethods(instance);
+		logger.info("Registering route ...");
 		registerRoutes();
+		getServer().getPluginManager().registerEvents(new BukkitListeners(instance), this);
+		
+		
+		// inject when we are ready
+		logger.info("Injecting http server ...");
+		injector.inject();
+		logger.info("Ready !");
 	}
 
 	public void registerRoutes() {
@@ -53,7 +86,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 			
 			@Override
 			public Void handle(RoutedHttpResponse event) {
-				System.out.println("[HTTP] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
+				logger.fine("[HTTP Request] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
 				return null;
 			}
 		});
@@ -61,9 +94,22 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
             @Override
             public FullHttpResponse handle(RoutedHttpRequest event) {
-                return new HttpResponseBuilder().text("hello world").build();
+                return new HttpResponseBuilder().text("mineweb_bridge").build();
             }
         });
+	}
+	
+	public void setupLogger() {
+		try {
+			logger.setUseParentHandlers(false);
+			FileHandler		fileHandler = new FileHandler(getDataFolder() + "/" + this.getDescription().getName() + "/" + "mineweb.log");
+			fileHandler.setFormatter(new CustomLogFormatter());
+			logger.addHandler(fileHandler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -84,6 +130,16 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	@Override
 	public Object getGameServer() {
 		return this.getServer();
+	}
+
+	@Override
+	public HashSet<String> getPlayers() {
+		return players;
+	}
+	
+	@Override
+	public Logger logger() {
+		return logger;
 	}
 
 }

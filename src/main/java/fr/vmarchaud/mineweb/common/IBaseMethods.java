@@ -1,17 +1,24 @@
 package fr.vmarchaud.mineweb.common;
 
-import java.util.List;
+import java.util.Set;
 
-import org.bukkit.entity.Player;
+import com.google.gson.JsonObject;
 
 public interface IBaseMethods {
 	
+	// get
 	public int				getPlayers();
 	public int				getMaxPlayers();
-	public List<Player>		getPlayerList();
+	public Set<String>		getPlayerList();
 	public boolean			isConnected(String name);
 	public String			getPluginType();
 	public String			getVersion();
+	public String			getMOTD();
+	public Set<String>		getWhitelist();
+	public Set<JsonObject>	getBannedlist();
+	
+	
+	// 
 	
 	
 	

@@ -23,6 +23,9 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.common;
 
+import java.util.Set;
+import java.util.logging.Logger;
+
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 
 public interface ICore {
@@ -51,6 +54,23 @@ public interface ICore {
 	 */
 	public EnumPluginType	getType();
 	
+	/**
+	 * Get a cached list of online players
+	 * @return List<String> of online players name
+	 */
+	public Set<String>		getPlayers();
+	
+	/**
+	 * Get instance of the implemented api
+	 * @return ICore interface of the plugin
+	 */
+	public static ICore		get() { return null; }
+	
+	/**
+	 * Get custom logger of the plugin
+	 * @return Logger instance
+	 */
+	public Logger			logger();
 	
 	public enum EnumPluginType {
 		BUKKIT, BUNGEE;
