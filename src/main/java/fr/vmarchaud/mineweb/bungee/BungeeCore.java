@@ -23,10 +23,14 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import fr.vmarchaud.mineweb.common.IBaseMethods;
 import fr.vmarchaud.mineweb.common.ICore;
@@ -57,6 +61,8 @@ public class BungeeCore extends Plugin implements ICore {
 	private IBaseMethods			methods;
 	private Logger					logger		= Logger.getLogger("Mineweb");
 	
+	private Gson					gson 		= new GsonBuilder().serializeNulls().create();
+	
 	public void onEnable() {
 		instance = this;
 		// directly setup logger
@@ -82,7 +88,7 @@ public class BungeeCore extends Plugin implements ICore {
 			
 			@Override
 			public Void handle(RoutedHttpResponse event) {
-				logger.fine("[HTTP Request] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " " + event.getRequest().getUri());
+				logger.fine("[HTTP Request] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " on " + event.getRequest().getUri());
 				return null;
 			}
 		});
@@ -98,6 +104,7 @@ public class BungeeCore extends Plugin implements ICore {
 	public void setupLogger() {
 		try {
 			logger.setUseParentHandlers(false);
+			new File(getDataFolder() + "/" + getDescription().getName() + "/").mkdirs();
 			FileHandler		fileHandler = new FileHandler(getDataFolder() + "/" + getDescription().getName() + "/" + "mineweb.log");
 			fileHandler.setFormatter(new CustomLogFormatter());
 			logger.addHandler(fileHandler);
@@ -136,6 +143,11 @@ public class BungeeCore extends Plugin implements ICore {
 	@Override
 	public Logger logger() {
 		return logger;
+	}
+
+	@Override
+	public Gson gson() {
+		return gson;
 	}
 
 }

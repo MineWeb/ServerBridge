@@ -27,10 +27,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.IBaseMethods;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
@@ -59,10 +64,17 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	private IBaseMethods			methods;
 	private Logger					logger		= Logger.getLogger("Mineweb");
 	
+	private Configuration			config;
+	private Gson					gson 		= new GsonBuilder().serializeNulls().create();
+	
 	@Override
 	public void onEnable() {
 		instance = this;
-		// directly setup logger
+		getDataFolder().mkdirs();
+		
+		// load config
+		config = Configuration.load(new File(getDataFolder(), "config.json"), instance);
+		// setup logger
 		setupLogger();
 		
 		// Init
@@ -101,8 +113,9 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	
 	public void setupLogger() {
 		try {
+			logger.setLevel(Level.parse(config.getLogLevel()));
 			logger.setUseParentHandlers(false);
-			FileHandler		fileHandler = new FileHandler(getDataFolder() + "/" + this.getDescription().getName() + "/" + "mineweb.log");
+			FileHandler		fileHandler = new FileHandler(getDataFolder() + "/" + "/" + "mineweb.log");
 			fileHandler.setFormatter(new CustomLogFormatter());
 			logger.addHandler(fileHandler);
 		} catch (SecurityException e) {
@@ -140,6 +153,11 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	@Override
 	public Logger logger() {
 		return logger;
+	}
+
+	@Override
+	public Gson gson() {
+		return gson;
 	}
 
 }

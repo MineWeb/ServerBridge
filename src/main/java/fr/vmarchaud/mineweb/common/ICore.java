@@ -26,6 +26,8 @@ package fr.vmarchaud.mineweb.common;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.gson.Gson;
+
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 
 public interface ICore {
@@ -71,6 +73,12 @@ public interface ICore {
 	 * @return Logger instance
 	 */
 	public Logger			logger();
+	
+	/**
+	 * Get our custom logger instance
+	 * @return
+	 */
+	public Gson				gson();
 	
 	public enum EnumPluginType {
 		BUKKIT, BUNGEE;
