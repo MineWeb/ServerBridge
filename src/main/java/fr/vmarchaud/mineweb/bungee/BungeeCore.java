@@ -25,17 +25,27 @@ package fr.vmarchaud.mineweb.bungee;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import fr.vmarchaud.mineweb.common.IBaseMethods;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
 import fr.vmarchaud.mineweb.common.ICore;
+import fr.vmarchaud.mineweb.common.IMethod;
+import fr.vmarchaud.mineweb.common.RequestHandler;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
+import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
+import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
+import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
+import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.Handler;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
@@ -46,22 +56,22 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeeCore extends Plugin implements ICore {
 	
-
 	public static ICore		instance;
 	public static ICore get() {
 		return instance;
 	}
 
-	private RouteMatcher			httpRouter;
-	private NettyInjector			injector;
+	private RouteMatcher				httpRouter;
+	private NettyInjector				injector;
+	private HashMap<String, IMethod>	methods;
+	private RequestHandler				requestHandler;
 	
 	/** Cached player list to not rely on Reflection on every request **/
-	private HashSet<String>			players;
+	private HashSet<String>				players;
 	
-	private IBaseMethods			methods;
-	private Logger					logger		= Logger.getLogger("Mineweb");
+	private Logger						logger		= Logger.getLogger("Mineweb");
 	
-	private Gson					gson 		= new GsonBuilder().serializeNulls().create();
+	private Gson						gson 		= new GsonBuilder().serializeNulls().create();
 	
 	public void onEnable() {
 		instance = this;
@@ -70,9 +80,10 @@ public class BungeeCore extends Plugin implements ICore {
 		
 		// Init
 		logger.info("Loading ...");
+		methods = new HashMap<String, IMethod>();
+		players = new HashSet<String>();
 		injector = new BungeeNettyInjector(this);
 		httpRouter = new RouteMatcher();
-		methods = new BungeeBaseMethods(instance);
 		logger.info("Registering route ...");
 		registerRoutes();
 		getProxy().getPluginManager().registerListener(this, new BungeeListeners(instance));
@@ -80,6 +91,10 @@ public class BungeeCore extends Plugin implements ICore {
 		// inject when we are ready
 		logger.info("Injecting http server ...");
 		injector.inject();
+		logger.info("Registering methods ...");
+		requestHandler = new RequestHandler(instance);
+		registerMethods();
+		
 		logger.info("Ready !");
 	}
 
@@ -88,7 +103,7 @@ public class BungeeCore extends Plugin implements ICore {
 			
 			@Override
 			public Void handle(RoutedHttpResponse event) {
-				logger.fine("[HTTP Request] " + event.getRes().getStatus().code() + " " + event.getRequest().getMethod().toString() + " on " + event.getRequest().getUri());
+				logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(), event.getRequest().getMethod().toString(), event.getRequest().getUri()));
 				return null;
 			}
 		});
@@ -96,16 +111,37 @@ public class BungeeCore extends Plugin implements ICore {
 		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
             @Override
             public FullHttpResponse handle(RoutedHttpRequest event) {
-                return new HttpResponseBuilder().text("mineweb_bridge").build();
+                return HttpResponseBuilder.ok();
             }
         });
+		
+		httpRouter.post("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
+            @Override
+            public FullHttpResponse handle(RoutedHttpRequest event) {
+                return requestHandler.handle(event);
+            }
+        });
+	}
+	
+	public void registerMethods() {
+		// common methods
+		methods.put("GET_PLAYER_LIST", new CommonGetPlayerList());
+		methods.put("GET_PLAYER_COUNT", new CommonGetPlayerCount());
+		methods.put("IS_CONNECTED", new CommonIsConnected());
+		methods.put("GET_PLUGIN_TYPE", new CommonPluginType());
+		
+		// bungee methods
+		methods.put("GET_MAX_PLAYERS", new BungeeGetMaxPlayers());
+		methods.put("GET_MOTD", new BungeeGetMOTD());
+		methods.put("GET_VERSION", new BungeeGetVersion());
+		
 	}
 	
 	public void setupLogger() {
 		try {
 			logger.setUseParentHandlers(false);
-			new File(getDataFolder() + "/" + getDescription().getName() + "/").mkdirs();
-			FileHandler		fileHandler = new FileHandler(getDataFolder() + "/" + getDescription().getName() + "/" + "mineweb.log");
+			new File(getDataFolder() + File.separator).mkdirs();
+			FileHandler	fileHandler = new FileHandler(getDataFolder() + File.separator + "mineweb.log", true);
 			fileHandler.setFormatter(new CustomLogFormatter());
 			logger.addHandler(fileHandler);
 		} catch (SecurityException e) {
@@ -149,5 +185,9 @@ public class BungeeCore extends Plugin implements ICore {
 	public Gson gson() {
 		return gson;
 	}
-
+	
+	@Override
+	public Map<String, IMethod> getMethods() {
+		return methods;
+	}
 }

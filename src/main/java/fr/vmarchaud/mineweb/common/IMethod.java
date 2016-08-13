@@ -21,21 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package fr.vmarchaud.mineweb.utils;
+package fr.vmarchaud.mineweb.common;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-
-public class CustomLogFormatter extends Formatter {
+@MethodHandler
+public interface IMethod {
 	
-    private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-
-	@Override
-	public String format(LogRecord record) {
-		return String.format("%s - [%s.%s] - %s - %s%s", dateFormat.format(new Date(record.getMillis())), 
-				record.getSourceClassName(), record.getSourceMethodName(), record.getLevel(), formatMessage(record), System.lineSeparator());
-	}
+	/**
+	 * This method will be executed when a request come
+	 * @param instance: API interface
+	 * @return inputs: array of object passed to the method
+	 */
+	public Object execute(ICore instance, Object... inputs);
 }

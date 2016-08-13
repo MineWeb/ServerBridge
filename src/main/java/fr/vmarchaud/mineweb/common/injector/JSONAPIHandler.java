@@ -14,7 +14,6 @@ import fr.vmarchaud.mineweb.common.ICore;
 
 class JSONAPIHandler extends SimpleChannelInboundHandler<Object> {
 	
-	private boolean						continueSending	= true;
 	private ICore						api;
 	
 	public JSONAPIHandler(ICore api) {
@@ -51,13 +50,11 @@ class JSONAPIHandler extends SimpleChannelInboundHandler<Object> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
-		continueSending = false;
 		ctx.close();
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		super.channelInactive(ctx);
-		continueSending = false;
 	}
 }

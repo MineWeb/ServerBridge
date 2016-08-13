@@ -23,6 +23,7 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.common;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -75,10 +76,16 @@ public interface ICore {
 	public Logger			logger();
 	
 	/**
-	 * Get our custom logger instance
+	 * Get our custom gson instance
 	 * @return
 	 */
 	public Gson				gson();
+	
+	/**
+	 * Get all registerd methods
+	 * @return Map<String, IMethod>
+	 */
+	public Map<String, IMethod>	getMethods();
 	
 	public enum EnumPluginType {
 		BUKKIT, BUNGEE;

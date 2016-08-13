@@ -21,21 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package fr.vmarchaud.mineweb.utils;
+package fr.vmarchaud.mineweb.bukkit.methods;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import java.util.Set;
 
-public class CustomLogFormatter extends Formatter {
-	
-    private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+import org.bukkit.Server;
+
+import org.bukkit.BanEntry;
+import org.bukkit.BanList.Type;
+
+import fr.vmarchaud.mineweb.common.ICore;
+import fr.vmarchaud.mineweb.common.IMethod;
+import fr.vmarchaud.mineweb.common.MethodHandler;
+
+@MethodHandler
+public class BukkitGetBannedPlayers implements IMethod {
 
 	@Override
-	public String format(LogRecord record) {
-		return String.format("%s - [%s.%s] - %s - %s%s", dateFormat.format(new Date(record.getMillis())), 
-				record.getSourceClassName(), record.getSourceMethodName(), record.getLevel(), formatMessage(record), System.lineSeparator());
+	public Object execute(ICore instance, Object... inputs) {
+		Set<BanEntry> banentries = ((Server)instance.getGameServer()).getBanList(Type.NAME).getBanEntries();
+		return instance.gson().toJson(banentries);
 	}
+
 }

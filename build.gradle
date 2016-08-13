@@ -1,9 +1,20 @@
+buildscript {
+  repositories {
+     mavenCentral()
+  }
+
+  dependencies {
+     classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+  }
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
+apply plugin: 'me.tatarka.retrolambda'
 
 group = 'fr.vmarchaud'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
 
 description = "mineweb_bridge"
 
@@ -17,18 +28,19 @@ repositories {
 	mavenCentral()
 	jcenter()
 }
+
 dependencies {
     compile "com.google.code.gson:gson:2.5"
     compile ("com.comphenix.protocol:ProtocolLib-API:4.0-SNAPSHOT") { 
 		exclude group: "com.comphenix.executors" 
 	}
+	compile 'com.annimon:stream:1.1.1'
     compileOnly "org.spigotmc:spigot:1.8-R0.1-SNAPSHOT"
     compileOnly "org.projectlombok:lombok:1.16.6"
     compileOnly "net.md-5:bungeecord-bootstrap:1.8-SNAPSHOT"
 }
 
 task fatJar(type: Jar) {
-    baseName = project.name + '_all'
     from {
     	configurations.compile.collect {
     		it.isDirectory() ? it : zipTree(it)
@@ -40,15 +52,9 @@ task fatJar(type: Jar) {
 task moveIntoBukkit(type: Copy) {
 	from "build/libs"
 	into '../_SERVER/plugins'
-	rename { String fileName ->
-		fileName.replace("mineweb_all-0.0.1-SNAPSHOT", "mineweb_bridge.jar")
-	}
 }
 
 task moveIntoBungee(type: Copy) {
 	from "build/libs"
 	into '../_BUNGEE/plugins'
-	rename { String fileName ->
-		fileName.replace("mineweb_all-0.0.1-SNAPSHOT", "mineweb_bridge.jar")
-	}
 }

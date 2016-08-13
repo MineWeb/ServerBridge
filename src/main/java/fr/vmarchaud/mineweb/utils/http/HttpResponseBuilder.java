@@ -23,8 +23,6 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.utils.http;
 
-import com.google.gson.Gson;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -85,8 +83,8 @@ public class HttpResponseBuilder {
 	 * 
 	 * @return Builder instance
 	 */
-	public HttpResponseBuilder json(Object json) {
-		this.body = new Gson().toJson(json);
+	public HttpResponseBuilder json(String json) {
+		this.body = json;
 		this.contentType = EnumContent.JSON;
 		return this;
 	}

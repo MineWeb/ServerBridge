@@ -23,19 +23,19 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.utils;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import io.netty.buffer.ByteBuf;
 
-public class CustomLogFormatter extends Formatter {
+public class ByteUtils {
 	
-    private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-
-	@Override
-	public String format(LogRecord record) {
-		return String.format("%s - [%s.%s] - %s - %s%s", dateFormat.format(new Date(record.getMillis())), 
-				record.getSourceClassName(), record.getSourceMethodName(), record.getLevel(), formatMessage(record), System.lineSeparator());
+	/**
+	 * Construct a String from a netty ByteBuf 
+	 * @param buf : ByteBuffer
+	 * @return String
+	 */
+	public static String bytebufToString(ByteBuf buf) {
+		byte[] bytecontent = new byte[buf.readableBytes()];
+		buf.readBytes(bytecontent);
+		
+		return new String(bytecontent);
 	}
 }
