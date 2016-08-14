@@ -23,15 +23,16 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.common;
 
-
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.crypto.spec.SecretKeySpec;
+
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-import fr.vmarchaud.mineweb.utils.ByteUtils;
+import fr.vmarchaud.mineweb.utils.CryptoUtils;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -39,20 +40,44 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 
 public class RequestHandler {
 	
-	private ICore		api;
+	private ICore			api;
+	private SecretKeySpec	key;
 	
+	/**
+	 * Construct an instance of the RequestHandler that will validate and respond to inbound request
+	 * @param api: instance of the API
+	 */
 	public RequestHandler(ICore api) {
 		this.api = api;
+		if (api.config().getSecretkey() != null)
+			key = new SecretKeySpec(api.config().getSecretkey().getBytes(), "AES");
+	}
+	
+	/**
+	 * Refresh the secretkey used to cipher and decipher request
+	 * @param secretKey: String containing the 32 bytes key
+	 */
+	public void	refreshKey(String secretKey) {
+		key = new SecretKeySpec(secretKey.getBytes(), "AES");
 	}
 	
 	public FullHttpResponse handle(RoutedHttpRequest httpRequest) {
+		if (api.config().getSecretkey() == null) {
+			api.logger().severe("Secret key isnt defined, please setup like wrote in the mineweb documentation.");
+			return new HttpResponseBuilder().code(HttpResponseStatus.NOT_IMPLEMENTED).build();
+		}
+
 		JsonObject 	response = new JsonObject();
 		
 		Type token = new TypeToken<Map<String, Object[]>>(){}.getType();
 		Map<String, Object[]> 	requests = null;
 		try {
-			requests = api.gson().fromJson(ByteUtils.bytebufToString(httpRequest.getRequest().content()), token);
+			// decipher request with the key
+			String content = CryptoUtils.decrypt(httpRequest.getRequest().content().array(), key);
+			// parse json to map of all request
+			requests = api.gson().fromJson(content, token);
 		} catch (Exception e) {
+			api.logger().severe(String.format("Cant decipher/parse a request : %s", e.getMessage()));
 			return HttpResponseBuilder.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 		}
 		
@@ -97,6 +122,16 @@ public class RequestHandler {
 			response.add(entry.getKey(), api.gson().toJsonTree(output));
 		}
 		
-		return new HttpResponseBuilder().json(api.gson().toJson(response)).code(HttpResponseStatus.OK).build();
+		api.logger().fine(String.format("request %s : %s", httpRequest.hashCode(), requests));
+		api.logger().fine(String.format("response %s : %s", httpRequest.hashCode() , response));
+		
+		try {
+			// try to cipher the data and send it
+			byte[] contentResp = CryptoUtils.encrypt(api.gson().toJson(response), key);
+			return new HttpResponseBuilder().raw(contentResp).code(HttpResponseStatus.OK).build();
+		} catch (Exception e) {
+			api.logger().severe(String.format("Cant cipher/serialize a request : %s", e.getMessage()));
+			return HttpResponseBuilder.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

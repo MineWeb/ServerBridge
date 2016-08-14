@@ -29,14 +29,13 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.util.CharsetUtil;
 import lombok.Getter;
 
 public class HttpResponseBuilder {
 	
 	
 	private HttpResponseStatus		status 			= HttpResponseStatus.OK;
-	private	String					body			= "";
+	private	byte[]					body			= new byte[0];
 	private EnumContent				contentType		= EnumContent.JSON;
 	
 	/**
@@ -45,7 +44,7 @@ public class HttpResponseBuilder {
 	 * @return FullHttpResponse
 	 */
 	public FullHttpResponse build() {
-		ByteBuf buf = Unpooled.copiedBuffer(body, CharsetUtil.UTF_8);
+		ByteBuf buf = Unpooled.copiedBuffer(body);
 		FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, buf);
 		response.headers().set("Content-Length", buf.readableBytes());
 		response.headers().set("Content-Type", contentType.getMime());
@@ -71,7 +70,7 @@ public class HttpResponseBuilder {
 	 * @return Builder instance
 	 */
 	public HttpResponseBuilder text(String text) {
-		this.body = text;
+		this.body = text.getBytes();
 		this.contentType = EnumContent.PLAIN;
 		return this;
 	}
@@ -84,8 +83,19 @@ public class HttpResponseBuilder {
 	 * @return Builder instance
 	 */
 	public HttpResponseBuilder json(String json) {
-		this.body = json;
+		this.body = json.getBytes();
 		this.contentType = EnumContent.JSON;
+		return this;
+	}
+	
+	/**
+	 * Set the text that the response will output (from raw bytes)
+	 * @param bytes: raw bytes to respond
+	 * @return Builder instance
+	 */
+	public HttpResponseBuilder raw(byte[] bytes) {
+		this.body = bytes;
+		this.contentType = EnumContent.BINARY;
 		return this;
 	}
 	
@@ -118,7 +128,8 @@ public class HttpResponseBuilder {
 	public enum EnumContent	{
 		JSON("application/json"),
 		PLAIN("text/plain"),
-		HTML("text/html");
+		HTML("text/html"),
+		BINARY("application/octet-stream");
 		
 		@Getter String mime;
 		

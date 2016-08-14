@@ -33,7 +33,7 @@ class JSONAPIHandler extends SimpleChannelInboundHandler<Object> {
 	private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
 		// Handle a bad request.
 		if (!req.getDecoderResult().isSuccess()) {
-			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
 			return;
 		}
 		api.getHTTPRouter().serveRequest(ctx, req);

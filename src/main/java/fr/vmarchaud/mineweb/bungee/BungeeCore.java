@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
@@ -37,6 +38,7 @@ import com.google.gson.GsonBuilder;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
+import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
 import fr.vmarchaud.mineweb.common.RequestHandler;
@@ -65,6 +67,7 @@ public class BungeeCore extends Plugin implements ICore {
 	private NettyInjector				injector;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
+	private Configuration				config;
 	
 	/** Cached player list to not rely on Reflection on every request **/
 	private HashSet<String>				players;
@@ -75,6 +78,10 @@ public class BungeeCore extends Plugin implements ICore {
 	
 	public void onEnable() {
 		instance = this;
+
+		// load config
+		Configuration.CONFIGURATION_PATH = new File(getDataFolder(), "config.json");
+		config = Configuration.load(instance);
 		// directly setup logger
 		setupLogger();
 		
@@ -94,7 +101,6 @@ public class BungeeCore extends Plugin implements ICore {
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
 		registerMethods();
-		
 		logger.info("Ready !");
 	}
 
@@ -139,6 +145,7 @@ public class BungeeCore extends Plugin implements ICore {
 	
 	public void setupLogger() {
 		try {
+			logger.setLevel(Level.parse(config.getLogLevel()));
 			logger.setUseParentHandlers(false);
 			new File(getDataFolder() + File.separator).mkdirs();
 			FileHandler	fileHandler = new FileHandler(getDataFolder() + File.separator + "mineweb.log", true);
@@ -189,5 +196,15 @@ public class BungeeCore extends Plugin implements ICore {
 	@Override
 	public Map<String, IMethod> getMethods() {
 		return methods;
+	}
+
+	@Override
+	public Configuration config() {
+		return config;
+	}
+
+	@Override
+	public RequestHandler requestHandler() {
+		return requestHandler;
 	}
 }

@@ -82,6 +82,18 @@ public interface ICore {
 	public Gson				gson();
 	
 	/**
+	 * Return the configuration used to store data
+	 * @return Configuration instance
+	 */
+	public Configuration	config();
+	
+	/**
+	 * Return the request handler that will cipher/decipher request
+	 * @return RequestHandler instance
+	 */
+	public RequestHandler	requestHandler();
+	
+	/**
 	 * Get all registerd methods
 	 * @return Map<String, IMethod>
 	 */

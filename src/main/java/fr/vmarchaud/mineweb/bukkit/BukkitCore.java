@@ -70,22 +70,23 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	private NettyInjector				injector;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
+	private Configuration				config;
 	
 	/** Cached player list to not rely on Reflection on every request **/
 	private HashSet<String>				players;
 	
 	private Logger						logger		= Logger.getLogger("Mineweb");
 	
-	private Configuration				config;
 	private Gson						gson 		= new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
 	
 	@Override
 	public void onEnable() {
 		instance = this;
 		getDataFolder().mkdirs();
-		
+
 		// load config
-		config = Configuration.load(new File(getDataFolder(), "config.json"), instance);
+		Configuration.CONFIGURATION_PATH = new File(getDataFolder(), "config.json");
+		config = Configuration.load(instance);
 		// setup logger
 		setupLogger();
 		
@@ -114,7 +115,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 			
 			@Override
 			public Void handle(RoutedHttpResponse event) {
-				logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(), event.getRequest().getMethod().toString(), event.getRequest().getUri()));
+				logger.info(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(), event.getRequest().getMethod().toString(), event.getRequest().getUri()));
 				return null;
 			}
 		});
@@ -203,5 +204,15 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	@Override
 	public Map<String, IMethod> getMethods() {
 		return methods;
+	}
+
+	@Override
+	public Configuration config() {
+		return config;
+	}
+
+	@Override
+	public RequestHandler requestHandler() {
+		return requestHandler;
 	}
 }

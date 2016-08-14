@@ -25,8 +25,8 @@ package fr.vmarchaud.mineweb.common;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import fr.vmarchaud.mineweb.utils.ConfigurationUtils;
 import lombok.Data;
@@ -34,8 +34,11 @@ import lombok.Data;
 @Data
 public class Configuration {
 	
+	public static transient File		CONFIGURATION_PATH;
+	
 	public String		logLevel = "FINE";
-	public Set<String>	tokens = new HashSet<String>();
+	public String		secretkey;
+	public String		activationKey;
 	
 	/**
 	 * Load the configuration from the file
@@ -43,19 +46,35 @@ public class Configuration {
 	 * @param ICore interface for logging and use gson instance
 	 * @return Configuration instance
 	 */
-	public static Configuration load(File path, ICore api) {
-		if (path.exists()) {
+	public static Configuration load(ICore api) {
+		if (CONFIGURATION_PATH.exists()) {
 			try {
-				return api.gson().fromJson(new FileReader(path), Configuration.class);
+				return api.gson().fromJson(new FileReader(CONFIGURATION_PATH), Configuration.class);
 			} catch (Exception e) {
 				api.logger().warning("Config file is invalid, replacing with a new one");
-				ConfigurationUtils.createDefault(path, api);
+				ConfigurationUtils.createDefault(CONFIGURATION_PATH, api);
 				return new Configuration();
 			}
 		} else {
 			api.logger().warning("Cant find a config file, creating it");
-			ConfigurationUtils.createDefault(path, api);
+			ConfigurationUtils.createDefault(CONFIGURATION_PATH, api);
 			return new Configuration();
+		}
+	}
+	
+	/**
+	 * Save the configuration to the file
+	 * @param File object representing the path of the file
+	 * @param ICore interface for logging and use gson instance
+	 */
+	public void save(ICore api) {
+		try {
+			String config = api.gson().toJson(this);
+			FileWriter writer = new FileWriter(CONFIGURATION_PATH);
+			writer.write(config);
+			writer.close();
+		} catch (IOException e) {
+			api.logger().severe("Cant save the config file " + e.getMessage());
 		}
 	}
 }
