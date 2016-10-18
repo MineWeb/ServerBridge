@@ -39,6 +39,7 @@ public class Configuration {
 	public String		logLevel = "FINE";
 	public String		secretkey;
 	public String		activationKey;
+	public String		domain;
 	
 	/**
 	 * Load the configuration from the file

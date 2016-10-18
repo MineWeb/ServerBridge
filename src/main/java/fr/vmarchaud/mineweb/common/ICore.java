@@ -94,10 +94,11 @@ public interface ICore {
 	public RequestHandler	requestHandler();
 	
 	/**
-	 * Get all registerd methods
+	 * Get all registered methods
 	 * @return Map<String, IMethod>
 	 */
 	public Map<String, IMethod>	getMethods();
+	
 	
 	public enum EnumPluginType {
 		BUKKIT, BUNGEE;

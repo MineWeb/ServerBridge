@@ -100,7 +100,6 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		registerRoutes();
 		getServer().getPluginManager().registerEvents(new BukkitListeners(instance), this);
 		
-		
 		// inject when we are ready
 		logger.info("Injecting http server ...");
 		injector.inject();

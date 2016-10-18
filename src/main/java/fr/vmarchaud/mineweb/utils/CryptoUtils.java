@@ -2,6 +2,7 @@ package fr.vmarchaud.mineweb.utils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 public class CryptoUtils {
 	
@@ -13,10 +14,11 @@ public class CryptoUtils {
 	 * 
 	 * @throws Exception
 	 */
-	public static byte[] encrypt(String data, SecretKeySpec key) throws Exception {
+	public static byte[] encrypt(String raw, SecretKeySpec key) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(String.valueOf(data).getBytes("UTF-8"));
+        byte[] ciphered = cipher.doFinal(raw.getBytes("UTF-8"));
+        return DatatypeConverter.printBase64Binary(ciphered).getBytes();
     }
 
 	/**
@@ -27,10 +29,11 @@ public class CryptoUtils {
 	 * 
 	 * @throws Exception
 	 */
-    public static String decrypt(byte[] data, SecretKeySpec key) throws Exception {
+    public static String decrypt(byte[] raw, SecretKeySpec key) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, key);
-        return new String(cipher.doFinal(data));
+        String data = DatatypeConverter.printBase64Binary(raw);
+        return new String(cipher.doFinal(data.getBytes()));
 
     }
 }
