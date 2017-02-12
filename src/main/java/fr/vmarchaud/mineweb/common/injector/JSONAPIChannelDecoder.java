@@ -42,9 +42,7 @@ public class JSONAPIChannelDecoder extends ByteToMessageDecoder {
 
             try {
                 while (p.removeLast() != null);
-            } catch (NoSuchElementException e) {
-
-            }
+            } catch (NoSuchElementException e) {}
             
             p.addLast("codec-http", new HttpServerCodec());
             p.addLast("aggregator", new HttpObjectAggregator(65536));

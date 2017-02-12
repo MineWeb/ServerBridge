@@ -38,7 +38,8 @@ public class Configuration {
 	
 	public String		logLevel = "FINE";
 	public String		secretkey;
-	public String		activationKey;
+	public String		licenseId;
+	public String		licenseKey;
 	public String		domain;
 	
 	/**

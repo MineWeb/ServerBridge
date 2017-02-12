@@ -50,11 +50,11 @@ task fatJar(type: Jar) {
 }
 
 task moveIntoBukkit(type: Copy) {
-	from "build/libs"
-	into '../_SERVER/plugins'
+	from "build/libs/mineweb_bridge-${version}.jar"
+	into '../_SERVER/plugins/'
 }
 
 task moveIntoBungee(type: Copy) {
-	from "build/libs"
-	into '../_BUNGEE/plugins'
+	from "build/libs/mineweb_bridge-${version}.jar"
+	into '../_BUNGEE/plugins/'
 }

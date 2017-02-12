@@ -49,11 +49,7 @@ import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
-import fr.vmarchaud.mineweb.utils.Handler;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
-import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
-import fr.vmarchaud.mineweb.utils.http.RoutedHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeeCore extends Plugin implements ICore {
@@ -74,7 +70,7 @@ public class BungeeCore extends Plugin implements ICore {
 	
 	private Logger						logger		= Logger.getLogger("Mineweb");
 	
-	private Gson						gson 		= new GsonBuilder().serializeNulls().create();
+	private Gson						gson 		= new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 	
 	public void onEnable() {
 		instance = this;
@@ -105,27 +101,14 @@ public class BungeeCore extends Plugin implements ICore {
 	}
 
 	public void registerRoutes() {
-		httpRouter.everyMatch(new Handler<Void, RoutedHttpResponse>() {
-			
-			@Override
-			public Void handle(RoutedHttpResponse event) {
-				logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(), event.getRequest().getMethod().toString(), event.getRequest().getUri()));
-				return null;
-			}
+		httpRouter.everyMatch((event) -> {
+			logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(),
+					event.getRequest().getMethod().toString(), event.getRequest().getUri()));
+			return null;
 		});
 		
-		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
-            @Override
-            public FullHttpResponse handle(RoutedHttpRequest event) {
-                return HttpResponseBuilder.ok();
-            }
-        });
-		
-		httpRouter.post("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
-            @Override
-            public FullHttpResponse handle(RoutedHttpRequest event) {
-                return requestHandler.handle(event);
-            }
+		httpRouter.get("/", (event) -> {
+            return HttpResponseBuilder.ok();
         });
 	}
 	
@@ -140,7 +123,6 @@ public class BungeeCore extends Plugin implements ICore {
 		methods.put("GET_MAX_PLAYERS", new BungeeGetMaxPlayers());
 		methods.put("GET_MOTD", new BungeeGetMOTD());
 		methods.put("GET_VERSION", new BungeeGetVersion());
-		
 	}
 	
 	public void setupLogger() {

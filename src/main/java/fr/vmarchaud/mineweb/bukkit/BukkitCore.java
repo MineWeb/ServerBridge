@@ -78,6 +78,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	private Logger						logger		= Logger.getLogger("Mineweb");
 	
 	private Gson						gson 		= new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
+	private FileHandler					fileHandler;
 	
 	@Override
 	public void onEnable() {
@@ -108,29 +109,22 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		registerMethods();
 		logger.info("Ready !");
 	}
+	
+	@Override
+	public void onDisable() {
+		logger.info("Shutting down ...");
+		fileHandler.close();
+	}
 
 	public void registerRoutes() {
-		httpRouter.everyMatch(new Handler<Void, RoutedHttpResponse>() {
-			
-			@Override
-			public Void handle(RoutedHttpResponse event) {
-				logger.info(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(), event.getRequest().getMethod().toString(), event.getRequest().getUri()));
-				return null;
-			}
+		httpRouter.everyMatch((event) -> {
+			//logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(),
+			//		event.getRequest().getMethod().toString(), event.getRequest().getUri()));
+			return null;
 		});
 		
-		httpRouter.get("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
-            @Override
-            public FullHttpResponse handle(RoutedHttpRequest event) {
-                return HttpResponseBuilder.ok();
-            }
-        });
-		
-		httpRouter.post("/", new Handler<FullHttpResponse, RoutedHttpRequest>() {
-            @Override
-            public FullHttpResponse handle(RoutedHttpRequest event) {
-                return requestHandler.handle(event);
-            }
+		httpRouter.get("/", (event) -> {
+            return HttpResponseBuilder.ok();
         });
 	}
 	
@@ -155,7 +149,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 			logger.setLevel(Level.parse(config.getLogLevel()));
 			logger.setUseParentHandlers(false);
 			new File(getDataFolder() + File.separator).mkdirs();
-			FileHandler	fileHandler = new FileHandler(getDataFolder() + File.separator + "mineweb.log", true);
+			fileHandler = new FileHandler(getDataFolder() + File.separator + "mineweb.log", true);
 			fileHandler.setFormatter(new CustomLogFormatter());
 			logger.addHandler(fileHandler);
 		} catch (SecurityException e) {

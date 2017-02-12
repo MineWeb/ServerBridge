@@ -35,7 +35,7 @@ public class CustomLogFormatter extends Formatter {
 
 	@Override
 	public String format(LogRecord record) {
-		return String.format("%s - [%s.%s] - %s - %s%s", dateFormat.format(new Date(record.getMillis())), 
-				record.getSourceClassName(), record.getSourceMethodName(), record.getLevel(), formatMessage(record), System.lineSeparator());
+		return String.format("%s - [%s.%s] - %s - %s%s", dateFormat.format(new Date()), record.getSourceClassName(),
+				record.getSourceMethodName(), record.getLevel(), formatMessage(record), System.lineSeparator());
 	}
 }
