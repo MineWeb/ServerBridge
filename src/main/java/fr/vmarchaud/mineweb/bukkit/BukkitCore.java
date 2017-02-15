@@ -43,7 +43,6 @@ import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMaxPlayers;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetVersion;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetWhitelistedPlayers;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitRunCommand;
-import fr.vmarchaud.mineweb.bungee.methods.BungeeRunCommand;
 import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
@@ -56,11 +55,7 @@ import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
-import fr.vmarchaud.mineweb.utils.Handler;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
-import fr.vmarchaud.mineweb.utils.http.RoutedHttpRequest;
-import fr.vmarchaud.mineweb.utils.http.RoutedHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
 
 public class BukkitCore extends JavaPlugin implements ICore {
 	

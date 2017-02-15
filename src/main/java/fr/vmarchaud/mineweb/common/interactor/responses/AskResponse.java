@@ -1,6 +1,5 @@
 package fr.vmarchaud.mineweb.common.interactor.responses;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
