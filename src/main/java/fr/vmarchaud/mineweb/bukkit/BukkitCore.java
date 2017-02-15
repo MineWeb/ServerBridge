@@ -42,6 +42,8 @@ import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMOTD;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMaxPlayers;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetVersion;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetWhitelistedPlayers;
+import fr.vmarchaud.mineweb.bukkit.methods.BukkitRunCommand;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeRunCommand;
 import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
@@ -50,6 +52,7 @@ import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
+import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
@@ -134,6 +137,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		methods.put("GET_PLAYER_COUNT", new CommonGetPlayerCount());
 		methods.put("IS_CONNECTED", new CommonIsConnected());
 		methods.put("GET_PLUGIN_TYPE", new CommonPluginType());
+		methods.put("GET_SYSTEM_STATS", new CommonGetSystemStats());
 		
 		// bukkit methods
 		methods.put("GET_BANNED_PLAYERS", new BukkitGetBannedPlayers());
@@ -141,6 +145,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		methods.put("GET_MOTD", new BukkitGetMOTD());
 		methods.put("GET_VERSION", new BukkitGetVersion());
 		methods.put("GET_WHITELISTED_PLAYERS", new BukkitGetWhitelistedPlayers());
+		methods.put("RUN_COMMAND", new BukkitRunCommand());
 		
 	}
 	

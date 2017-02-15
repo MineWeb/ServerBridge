@@ -38,6 +38,7 @@ import com.google.gson.GsonBuilder;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeRunCommand;
 import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
@@ -46,6 +47,7 @@ import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
+import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
@@ -118,11 +120,13 @@ public class BungeeCore extends Plugin implements ICore {
 		methods.put("GET_PLAYER_COUNT", new CommonGetPlayerCount());
 		methods.put("IS_CONNECTED", new CommonIsConnected());
 		methods.put("GET_PLUGIN_TYPE", new CommonPluginType());
+		methods.put("GET_SYSTEM_STATS", new CommonGetSystemStats());
 		
 		// bungee methods
 		methods.put("GET_MAX_PLAYERS", new BungeeGetMaxPlayers());
 		methods.put("GET_MOTD", new BungeeGetMOTD());
 		methods.put("GET_VERSION", new BungeeGetVersion());
+		methods.put("RUN_COMMAND", new BungeeRunCommand());
 	}
 	
 	public void setupLogger() {
