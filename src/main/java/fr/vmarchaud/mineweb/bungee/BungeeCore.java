@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,11 +39,13 @@ import com.google.gson.GsonBuilder;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
-import fr.vmarchaud.mineweb.bungee.methods.BungeeRunCommand;
-import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
 import fr.vmarchaud.mineweb.common.RequestHandler;
+import fr.vmarchaud.mineweb.common.CommandScheduler;
+import fr.vmarchaud.mineweb.common.configuration.Configuration;
+import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
+import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
@@ -50,9 +53,12 @@ import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
 import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
+import fr.vmarchaud.mineweb.common.methods.CommonRunCommand;
+import fr.vmarchaud.mineweb.common.methods.CommonScheduledCommand;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 public class BungeeCore extends Plugin implements ICore {
 	
@@ -65,21 +71,31 @@ public class BungeeCore extends Plugin implements ICore {
 	private NettyInjector				injector;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
-	private Configuration				config;
+	private PluginConfiguration			config;
+	private ScheduledStorage			storage;
+	private CommandScheduler			commandScheduler;
+	private ScheduledTask				task;
 	
 	/** Cached player list to not rely on Reflection on every request **/
 	private HashSet<String>				players;
 	
-	private Logger						logger		= Logger.getLogger("Mineweb");
+	private Logger						logger = Logger.getLogger("Mineweb");
 	
-	private Gson						gson 		= new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+	private Gson						gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+	private FileHandler					fileHandler;
 	
 	public void onEnable() {
 		instance = this;
 
 		// load config
-		Configuration.CONFIGURATION_PATH = new File(getDataFolder(), "config.json");
-		config = Configuration.load(instance);
+		try {
+			config = Configuration.load(new File(getDataFolder(), "config.json"), instance, PluginConfiguration.class);
+			storage = Configuration.load(new File(getDataFolder(), "commands.json"), instance, ScheduledStorage.class);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 		// directly setup logger
 		setupLogger();
 		
@@ -99,7 +115,18 @@ public class BungeeCore extends Plugin implements ICore {
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
 		registerMethods();
+		logger.info("Starting CommandScheduler ...");
+		commandScheduler = new CommandScheduler(instance, storage);
+		task = getProxy().getScheduler().schedule(this, commandScheduler, 5, TimeUnit.SECONDS);
 		logger.info("Ready !");
+	}
+	
+	@Override
+	public void onDisable() {
+		task.cancel();
+		commandScheduler.save();
+		logger.info("Shutting down ...");
+		fileHandler.close();
 	}
 
 	public void registerRoutes() {
@@ -121,12 +148,13 @@ public class BungeeCore extends Plugin implements ICore {
 		methods.put("IS_CONNECTED", new CommonIsConnected());
 		methods.put("GET_PLUGIN_TYPE", new CommonPluginType());
 		methods.put("GET_SYSTEM_STATS", new CommonGetSystemStats());
+		methods.put("RUN_COMMAND", new CommonRunCommand());
+		methods.put("RUN_SCHEDULED_COMMAND", new CommonScheduledCommand());
 		
 		// bungee methods
 		methods.put("GET_MAX_PLAYERS", new BungeeGetMaxPlayers());
 		methods.put("GET_MOTD", new BungeeGetMOTD());
 		methods.put("GET_VERSION", new BungeeGetVersion());
-		methods.put("RUN_COMMAND", new BungeeRunCommand());
 	}
 	
 	public void setupLogger() {
@@ -134,7 +162,7 @@ public class BungeeCore extends Plugin implements ICore {
 			logger.setLevel(Level.parse(config.getLogLevel()));
 			logger.setUseParentHandlers(false);
 			new File(getDataFolder() + File.separator).mkdirs();
-			FileHandler	fileHandler = new FileHandler(getDataFolder() + File.separator + "mineweb.log", true);
+			fileHandler = new FileHandler(getDataFolder() + File.separator + "mineweb.log", true);
 			fileHandler.setFormatter(new CustomLogFormatter());
 			logger.addHandler(fileHandler);
 		} catch (SecurityException e) {
@@ -185,12 +213,22 @@ public class BungeeCore extends Plugin implements ICore {
 	}
 
 	@Override
-	public Configuration config() {
+	public PluginConfiguration config() {
 		return config;
 	}
 
 	@Override
 	public RequestHandler requestHandler() {
 		return requestHandler;
+	}
+
+	@Override
+	public void runCommand(String command) {
+		getProxy().getPluginManager().dispatchCommand(getProxy().getConsole(), command);
+	}
+
+	@Override
+	public CommandScheduler getCommandScheduler() {
+		return commandScheduler;
 	}
 }

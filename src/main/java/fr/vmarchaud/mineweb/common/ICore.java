@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
+import fr.vmarchaud.mineweb.common.configuration.Configuration;
+import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 
 public interface ICore {
@@ -85,7 +87,7 @@ public interface ICore {
 	 * Return the configuration used to store data
 	 * @return Configuration instance
 	 */
-	public Configuration	config();
+	public PluginConfiguration	config();
 	
 	/**
 	 * Return the request handler that will cipher/decipher request
@@ -99,6 +101,20 @@ public interface ICore {
 	 */
 	public Map<String, IMethod>	getMethods();
 	
+	
+	/**
+	 * Get the scheduled command Manager
+	 * 
+	 * @return ScheduledManager
+	 */
+	public CommandScheduler		getCommandScheduler();
+	
+	/**
+	 * Run a command on the gameserver
+	 * 
+	 * @param the command to execute
+	 */
+	public void runCommand(String command);
 	
 	public enum EnumPluginType {
 		BUKKIT, BUNGEE;

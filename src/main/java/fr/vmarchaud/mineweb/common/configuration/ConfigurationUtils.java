@@ -21,62 +21,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package fr.vmarchaud.mineweb.common;
+package fr.vmarchaud.mineweb.common.configuration;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Level;
 
-import fr.vmarchaud.mineweb.utils.ConfigurationUtils;
-import lombok.Data;
+import com.google.gson.GsonBuilder;
 
-@Data
-public class Configuration {
-	
-	public static transient File		CONFIGURATION_PATH;
-	
-	public String		logLevel = "FINE";
-	public String		secretkey;
-	public String		licenseId;
-	public String		licenseKey;
-	public String		domain;
+import fr.vmarchaud.mineweb.common.ICore;
+
+public class ConfigurationUtils {
 	
 	/**
-	 * Load the configuration from the file
-	 * @param File object representing the path of the file
-	 * @param ICore interface for logging and use gson instance
-	 * @return Configuration instance
+	 * Read all content of a file 
+	 * @param File object that point to the file 
+	 * @return String containing all the content
 	 */
-	public static Configuration load(ICore api) {
-		if (CONFIGURATION_PATH.exists()) {
-			try {
-				return api.gson().fromJson(new FileReader(CONFIGURATION_PATH), Configuration.class);
-			} catch (Exception e) {
-				api.logger().warning("Config file is invalid, replacing with a new one");
-				ConfigurationUtils.createDefault(CONFIGURATION_PATH, api);
-				return new Configuration();
-			}
-		} else {
-			api.logger().warning("Cant find a config file, creating it");
-			ConfigurationUtils.createDefault(CONFIGURATION_PATH, api);
-			return new Configuration();
+	public static String readConfig(File path) {
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(path));
+		    StringBuilder sb = new StringBuilder();
+		    String line = br.readLine();
+
+		    while (line != null) {
+		        sb.append(line);
+		        line = br.readLine();
+		    }
+		    return sb.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+		    return "";
+		} finally {
+		    try {
+				br.close();
+			} catch (IOException e) { }
 		}
 	}
 	
 	/**
-	 * Save the configuration to the file
+	 * Create a default config in the desired path
 	 * @param File object representing the path of the file
-	 * @param ICore interface for logging and use gson instance
+	 * @param ICore interface for logging
 	 */
-	public void save(ICore api) {
+	public static void	createDefault(File path, ICore api, Class type) {
+		String config = new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(type);
 		try {
-			String config = api.gson().toJson(this);
-			FileWriter writer = new FileWriter(CONFIGURATION_PATH);
+			FileWriter writer = new FileWriter(path);
 			writer.write(config);
 			writer.close();
 		} catch (IOException e) {
-			api.logger().severe("Cant save the config file " + e.getMessage());
+			api.logger().log(Level.SEVERE, "Cant write the configuration", e);
 		}
 	}
 }

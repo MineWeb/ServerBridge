@@ -28,11 +28,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,11 +44,13 @@ import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMOTD;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMaxPlayers;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetVersion;
 import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetWhitelistedPlayers;
-import fr.vmarchaud.mineweb.bukkit.methods.BukkitRunCommand;
-import fr.vmarchaud.mineweb.common.Configuration;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
 import fr.vmarchaud.mineweb.common.RequestHandler;
+import fr.vmarchaud.mineweb.common.CommandScheduler;
+import fr.vmarchaud.mineweb.common.configuration.Configuration;
+import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
+import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
@@ -54,6 +58,8 @@ import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
 import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
+import fr.vmarchaud.mineweb.common.methods.CommonRunCommand;
+import fr.vmarchaud.mineweb.common.methods.CommonScheduledCommand;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 
@@ -68,7 +74,10 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	private NettyInjector				injector;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
-	private Configuration				config;
+	private PluginConfiguration			config;
+	private ScheduledStorage			storage;
+	private CommandScheduler			commandScheduler;
+	private BukkitTask					task;
 	
 	/** Cached player list to not rely on Reflection on every request **/
 	private HashSet<String>				players;
@@ -84,8 +93,14 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		getDataFolder().mkdirs();
 
 		// load config
-		Configuration.CONFIGURATION_PATH = new File(getDataFolder(), "config.json");
-		config = Configuration.load(instance);
+		try {
+			config = Configuration.load(new File(getDataFolder(), "config.json"), instance, PluginConfiguration.class);
+			storage = Configuration.load(new File(getDataFolder(), "commands.json"), instance, ScheduledStorage.class);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 		// setup logger
 		setupLogger();
 		
@@ -105,19 +120,24 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
 		registerMethods();
+		logger.info("Starting CommandScheduler ...");
+		commandScheduler = new CommandScheduler(instance, storage);
+		task = getServer().getScheduler().runTaskTimerAsynchronously(this, commandScheduler, 0, 5 * 1000);
 		logger.info("Ready !");
 	}
 	
 	@Override
 	public void onDisable() {
+		task.cancel();
+		commandScheduler.save();
 		logger.info("Shutting down ...");
 		fileHandler.close();
 	}
 
 	public void registerRoutes() {
 		httpRouter.everyMatch((event) -> {
-			//logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(),
-			//		event.getRequest().getMethod().toString(), event.getRequest().getUri()));
+			logger.fine(String.format("[HTTP Request] %d %s on %s", event.getRes().getStatus().code(),
+					event.getRequest().getMethod().toString(), event.getRequest().getUri()));
 			return null;
 		});
 		
@@ -133,6 +153,8 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		methods.put("IS_CONNECTED", new CommonIsConnected());
 		methods.put("GET_PLUGIN_TYPE", new CommonPluginType());
 		methods.put("GET_SYSTEM_STATS", new CommonGetSystemStats());
+		methods.put("RUN_COMMAND", new CommonRunCommand());
+		methods.put("RUN_SCHEDULED_COMMAND", new CommonScheduledCommand());
 		
 		// bukkit methods
 		methods.put("GET_BANNED_PLAYERS", new BukkitGetBannedPlayers());
@@ -140,7 +162,6 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		methods.put("GET_MOTD", new BukkitGetMOTD());
 		methods.put("GET_VERSION", new BukkitGetVersion());
 		methods.put("GET_WHITELISTED_PLAYERS", new BukkitGetWhitelistedPlayers());
-		methods.put("RUN_COMMAND", new BukkitRunCommand());
 		
 	}
 	
@@ -157,6 +178,11 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void runCommand(String command) {
+		getServer().dispatchCommand(getServer().getConsoleSender(), command);
 	}
 
 	@Override
@@ -200,12 +226,17 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	}
 
 	@Override
-	public Configuration config() {
+	public PluginConfiguration config() {
 		return config;
 	}
 
 	@Override
 	public RequestHandler requestHandler() {
 		return requestHandler;
+	}
+
+	@Override
+	public CommandScheduler getCommandScheduler() {
+		return commandScheduler;
 	}
 }
