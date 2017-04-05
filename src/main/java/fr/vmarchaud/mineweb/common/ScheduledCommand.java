@@ -1,7 +1,5 @@
 package fr.vmarchaud.mineweb.common;
 
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,5 +8,5 @@ public class ScheduledCommand {
 
 	private String command;
 	private String player;
-	private Date date;
+	private Long timestamp;
 }

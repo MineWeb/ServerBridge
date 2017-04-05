@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
-import fr.vmarchaud.mineweb.common.configuration.Configuration;
 import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 

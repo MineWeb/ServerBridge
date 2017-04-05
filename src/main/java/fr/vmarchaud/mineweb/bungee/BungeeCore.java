@@ -43,7 +43,6 @@ import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
 import fr.vmarchaud.mineweb.common.RequestHandler;
 import fr.vmarchaud.mineweb.common.CommandScheduler;
-import fr.vmarchaud.mineweb.common.configuration.Configuration;
 import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
@@ -51,6 +50,7 @@ import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
 import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
+import fr.vmarchaud.mineweb.common.methods.CommonGetTimestamp;
 import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
 import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
 import fr.vmarchaud.mineweb.common.methods.CommonRunCommand;
@@ -88,14 +88,8 @@ public class BungeeCore extends Plugin implements ICore {
 		instance = this;
 
 		// load config
-		try {
-			config = Configuration.load(new File(getDataFolder(), "config.json"), instance, PluginConfiguration.class);
-			storage = Configuration.load(new File(getDataFolder(), "commands.json"), instance, ScheduledStorage.class);
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
+		config = PluginConfiguration.load(new File(getDataFolder(), "config.json"), instance);
+		storage = ScheduledStorage.load(new File(getDataFolder(), "commands.json"), instance);
 		// directly setup logger
 		setupLogger();
 		
@@ -123,10 +117,10 @@ public class BungeeCore extends Plugin implements ICore {
 	
 	@Override
 	public void onDisable() {
-		task.cancel();
-		commandScheduler.save();
-		logger.info("Shutting down ...");
-		fileHandler.close();
+		if (task != null) task.cancel();
+		if (commandScheduler != null) commandScheduler.save();
+		if (logger != null) logger.info("Shutting down ...");
+		if (fileHandler != null) fileHandler.close();
 	}
 
 	public void registerRoutes() {
@@ -150,6 +144,7 @@ public class BungeeCore extends Plugin implements ICore {
 		methods.put("GET_SYSTEM_STATS", new CommonGetSystemStats());
 		methods.put("RUN_COMMAND", new CommonRunCommand());
 		methods.put("RUN_SCHEDULED_COMMAND", new CommonScheduledCommand());
+		methods.put("GET_SERVER_TIMESTAMP", new CommonGetTimestamp());
 		
 		// bungee methods
 		methods.put("GET_MAX_PLAYERS", new BungeeGetMaxPlayers());

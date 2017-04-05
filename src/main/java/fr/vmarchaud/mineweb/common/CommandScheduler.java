@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
-
 import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
 import lombok.Getter;
 
@@ -40,7 +38,7 @@ public class CommandScheduler implements Runnable {
 		while(it.hasNext()) {
 			ScheduledCommand command = it.next();
 			// if the command is in the future, continue
-			if (command.getDate().after(now))
+			if (new Date(command.getTimestamp()).after(now))
 				continue;
 			// if the command need a player to be online and this player isn't connected, continue
 			if (command.getPlayer() != null && !api.getPlayers().contains(command.getPlayer()))
@@ -56,8 +54,7 @@ public class CommandScheduler implements Runnable {
 		}
 		
 		// save them on the disk
-		storage.setCommands(commands);
-		storage.save(api);
+		save();
 	}
 	
 	/**

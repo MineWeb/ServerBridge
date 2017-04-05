@@ -49,8 +49,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 
 public class RequestHandler {
 	
-	private ICore			api;
-	private SecretKeySpec	key;
+	private ICore api;
+	private SecretKeySpec key;
+	private boolean	debug;
 	
 	/**
 	 * Construct an instance of the RequestHandler that will validate and respond to inbound request
@@ -64,6 +65,7 @@ public class RequestHandler {
 		// register handshake endpoint
 		api.getHTTPRouter().post("/handshake", (request) -> this.handleHandshake(request.getRequest()));
 		api.getHTTPRouter().post("/ask", (request) -> this.handle(request.getRequest()));
+		debug = System.getenv("DEBUG") != null && System.getenv("DEBUG").equals("true");
 	}
 	
 	/**
@@ -159,7 +161,8 @@ public class RequestHandler {
 		try {
 			// parse json to map
 			request = api.gson().fromJson(content, AskRequest.class);
-			String tmp = CryptoUtils.decryptAES(request.getSigned(), key, request.getIv());
+			// if in debug, request is done in plaintext
+			String tmp = debug ? request.getSigned() : CryptoUtils.decryptAES(request.getSigned(), key, request.getIv());
 			JsonReader reader = new JsonReader(new StringReader(tmp));
 			reader.setLenient(true);
 			requests = api.gson().fromJson(reader, token);
@@ -195,6 +198,10 @@ public class RequestHandler {
 			if (annot.inputs() > 0) {
 				boolean valid = true;
 				for(int i = 0; i < annot.types().length; i++) {
+					if (debug) {
+						api.logger().fine("Comparing input " + inputs[i] + " of class " 
+								+ inputs[i].getClass().getName() + " to class " + annot.types()[i].getName());
+					}
 					if (!inputs[i].getClass().getName().equals(annot.types()[i].getName())) {
 						valid = false;
 						break ;
@@ -216,9 +223,11 @@ public class RequestHandler {
 		try {
 			// try to cipher the data and send it
 			AskResponse askResponse = new AskResponse();
-			askResponse.setSigned(CryptoUtils.encryptAES(api.gson().toJson(response), key, request.getIv()));
+			String json = api.gson().toJson(response);
+			// dont cipher in debug mode
+			askResponse.setSigned(debug ? json : CryptoUtils.encryptAES(json, key, request.getIv()));
 			askResponse.setIv(request.getIv());
-			return new HttpResponseBuilder().text(api.gson().toJson(askResponse)).code(HttpResponseStatus.OK).build();
+			return new HttpResponseBuilder().json(api.gson().toJson(askResponse)).code(HttpResponseStatus.OK).build();
 		} catch (Exception e) {
 			api.logger().severe(String.format("Cant cipher/serialize a response : %s", e.getMessage()));
 			return HttpResponseBuilder.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
