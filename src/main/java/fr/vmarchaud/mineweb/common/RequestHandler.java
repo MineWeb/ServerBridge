@@ -136,7 +136,7 @@ public class RequestHandler {
 			
 			return new HttpResponseBuilder().code(HttpResponseStatus.OK).json(api.gson().toJson(response)).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (debug) e.printStackTrace();
 			return new HttpResponseBuilder().code(HttpResponseStatus.INTERNAL_SERVER_ERROR).json(api.gson().toJson(e.getMessage())).build();
 		}
 	}
@@ -171,7 +171,7 @@ public class RequestHandler {
 			requests = api.gson().fromJson(reader, token);
 		} catch (Exception e) {
 			api.logger().severe(String.format("Cant decipher/parse a request : %s", e.getMessage()));
-			e.printStackTrace();
+			if (debug) e.printStackTrace();
 			return HttpResponseBuilder.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 		}
 		
@@ -232,6 +232,7 @@ public class RequestHandler {
 			JsonObject res = new JsonObject();
 			res.addProperty("name", command.getName());
 			res.add("response", api.gson().toJsonTree(output));
+			response.add(res);
 		}
 		
 		api.logger().fine(String.format("request %s : %s", httpRequest.hashCode(), api.gson().toJson(requests)));
