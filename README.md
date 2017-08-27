@@ -8,9 +8,9 @@ You need to set the `DEBUG` env variable to `true`, so just start your minecraft
 The HTTP server will then don't try to decipher request and cipher response, so you'll just need to make a request by serializing the json inside signed :
 
 ```curl
-curl -XPOST http://localhost:25565/ask -d '{ "iv": 24444434, "signed": "{ \"GET_PLAYER_COUNT\": [] }"}' 
+curl -XPOST http://localhost:25565/ask -d '{ "signed": "[ { \"name\":\"GET_PLAYER_COUNT\", \"args\": [] }]", "iv": "415454a12a1" }' 
 ```
-You will received response serialized, signed will be ```{ "iv": 24444434, "signed": "{ \"GET_PLAYER_COUNT\": 0 }"}```
+You will received response serialized, signed will be ```{ "signed": "[{\"name\":\"GET_PLAYER_COUNT\",\"response\":0}]", "iv": "415454a12a1" }```
 
 ## Methods available 
 
