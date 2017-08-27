@@ -26,10 +26,13 @@ package fr.vmarchaud.mineweb.common;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.crypto.spec.SecretKeySpec;
+
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -153,10 +156,10 @@ public class RequestHandler {
 		ByteBuf buf = httpRequest.content();
 		String content = buf.toString(buf.readerIndex(), buf.readableBytes(), Charset.forName("UTF-8"));
 		
-		Map<String, Object[]> requests;
+		List<Command> requests;
 		AskRequest request;
-		JsonObject response = new JsonObject();
-		Type token = new TypeToken<Map<String, Object[]>>(){}.getType();
+		JsonArray response = new JsonArray();
+		Type token = new TypeToken<List<Command>>(){}.getType();
 		
 		try {
 			// parse json to map
@@ -172,25 +175,34 @@ public class RequestHandler {
 			return HttpResponseBuilder.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		for(Entry<String, Object[]> entry : requests.entrySet()) {
-			IMethod 	method = api.getMethods().get(entry.getKey());
-			Object[] 	inputs = entry.getValue();
+		for(Command command : requests) {
+			IMethod 	method = api.getMethods().get(command.getName());
+			Object[] 	inputs = command.getArgs();
 			
 			// if we didnt found the method just continue
 			if (method == null) {
-				response.addProperty(entry.getKey(), "NOT_FOUND");
+				JsonObject res = new JsonObject();
+				res.addProperty("name", command.getName());
+				res.addProperty("response", "NOT_FOUND");
+				response.add(res);
 				continue ;
 			}
 			
 			// verify if the params size are same as requested by the method handler
 			MethodHandler annot = method.getClass().getDeclaredAnnotation(MethodHandler.class);
 			if (annot == null) {
-				response.addProperty(entry.getKey(), "INVALID_METHOD");
+				JsonObject res = new JsonObject();
+				res.addProperty("name", command.getName());
+				res.addProperty("response", "INVALID_IMPLEMENTED_METHOD");
+				response.add(res);
 				continue ;
 			}
 			
 			if (annot.inputs() != inputs.length) {
-				response.addProperty(entry.getKey(), "BAD_REQUEST");
+				JsonObject res = new JsonObject();
+				res.addProperty("name", command.getName());
+				res.addProperty("response", "BAD_REQUEST_ARGS_LENGTH");
+				response.add(res);
 				continue ;
 			}
 			
@@ -208,13 +220,18 @@ public class RequestHandler {
 					}
 				}
 				if (!valid) {
-					response.addProperty(entry.getKey(), "BAD_REQUEST");
+					JsonObject res = new JsonObject();
+					res.addProperty("name", command.getName());
+					res.addProperty("response", "BAD_REQUEST_ARGS_TYPE");
+					response.add(res);
 					continue; 
 				}
 			}
 			// execute the method and put the result into the response
 			Object output = method.execute(api, inputs);
-			response.add(entry.getKey(), api.gson().toJsonTree(output));
+			JsonObject res = new JsonObject();
+			res.addProperty("name", command.getName());
+			res.add("response", api.gson().toJsonTree(output));
 		}
 		
 		api.logger().fine(String.format("request %s : %s", httpRequest.hashCode(), api.gson().toJson(requests)));
