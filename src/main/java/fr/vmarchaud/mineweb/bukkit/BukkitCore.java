@@ -36,6 +36,8 @@ import java.util.logging.Logger;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.Command;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -64,6 +66,8 @@ import fr.vmarchaud.mineweb.common.methods.CommonScheduledCommand;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 
+import static sun.print.CUPSPrinter.getServer;
+
 public class BukkitCore extends JavaPlugin implements ICore {
 	
 	public static ICore		instance;
@@ -87,7 +91,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	
 	private Gson						gson 		= new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
 	private FileHandler					fileHandler;
-	
+
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -127,6 +131,20 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		if (commandScheduler != null) commandScheduler.save();
 		if (logger != null) logger.info("Shutting down ...");
 		if (fileHandler != null) fileHandler.close();
+	}
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (cmd.getName().equalsIgnoreCase("mineweb")) {
+			if (args.length == 1 && args[0].equalsIgnoreCase("reset")) {
+				instance.config().reset();
+				config = PluginConfiguration.load(new File(getDataFolder(), "config.json"), instance);
+				sender.sendMessage("MineWebBridge configuration reset!");
+				logger.info("MineWebBridge configuration reset!");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void registerRoutes() {

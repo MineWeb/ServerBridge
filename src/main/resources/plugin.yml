@@ -1,4 +1,9 @@
 name: MinewebBridge
 main: fr.vmarchaud.mineweb.bukkit.BukkitCore
-version: 1.0
+version: 2.0.0
 author: ThisIsMac
+commands:
+  mineweb:
+    description: Reset configuration
+    usage: /mineweb reset
+    permission: mineweb.reset

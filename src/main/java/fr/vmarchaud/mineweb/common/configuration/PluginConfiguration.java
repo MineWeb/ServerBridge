@@ -69,4 +69,18 @@ public class PluginConfiguration {
 			api.logger().severe("Cant save the config file " + e.getMessage());
 		}
 	}
+
+	/**
+	 * Reset the configuration to the file
+	 */
+	public void reset() {
+		try {
+			String config = "{\"logLevel\":\"FINE\",\"secretkey\":null,\"licenseId\":null,\"licenseKey\":null,\"domain\":null}";
+			FileWriter writer = new FileWriter(path);
+			writer.write(config);
+			writer.close();
+		} catch (IOException e) {
+			System.out.println("Cant save the config file " + e.getMessage());
+		}
+	}
 }
