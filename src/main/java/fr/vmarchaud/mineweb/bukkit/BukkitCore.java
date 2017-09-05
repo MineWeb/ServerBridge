@@ -66,8 +66,6 @@ import fr.vmarchaud.mineweb.common.methods.CommonScheduledCommand;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 
-import static sun.print.CUPSPrinter.getServer;
-
 public class BukkitCore extends JavaPlugin implements ICore {
 	
 	public static ICore		instance;
@@ -137,8 +135,10 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("mineweb")) {
 			if (args.length == 1 && args[0].equalsIgnoreCase("reset")) {
-				instance.config().reset();
-				config = PluginConfiguration.load(new File(getDataFolder(), "config.json"), instance);
+				/*instance.config().reset();
+				config = PluginConfiguration.load(new File(getDataFolder(), "config.json"), instance);*/
+				config = new PluginConfiguration(new File(getDataFolder(), "config.json"));
+				config.save(instance);
 				sender.sendMessage("MineWebBridge configuration reset!");
 				logger.info("MineWebBridge configuration reset!");
 				return true;
