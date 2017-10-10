@@ -30,6 +30,7 @@ repositories {
 }
 
 dependencies {
+    compile "com.google.guava:guava:10.0"
     compile "com.google.code.gson:gson:2.5"
     compile ("com.comphenix.protocol:ProtocolLib-API:4.0-SNAPSHOT") { 
 		exclude group: "com.comphenix.executors" 
