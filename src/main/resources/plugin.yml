@@ -4,6 +4,14 @@ version: 2.0.0
 author: ThisIsMac
 commands:
   mineweb:
-    description: Reset configuration
+    description: Commands to manage MineWebBridge
+    usage: |
+      Use /help mineweb [subcommand] for more information
+      /mineweb reset - Reset the link
+      /mineweb port <port> - Setup custom port
+  mineweb reset:
+    description: Reset plugin configuration
     usage: /mineweb reset
-    permission: mineweb.reset
+  mineweb port:
+    description: Setup custom port
+    usage: /mineweb port <port>

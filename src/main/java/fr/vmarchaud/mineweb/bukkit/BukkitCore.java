@@ -34,6 +34,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import fr.vmarchaud.mineweb.common.injector.NettyServer;
+import fr.vmarchaud.mineweb.common.injector.WebThread;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.command.CommandSender;
@@ -75,6 +77,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	
 	private RouteMatcher				httpRouter;
 	private NettyInjector				injector;
+	private WebThread					nettyServerThread;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
 	private PluginConfiguration			config;
@@ -105,15 +108,28 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		logger.info("Loading ...");
 		methods = new HashMap<String, IMethod>();
 		players = new HashSet<String>();
-		injector = new BukkitNettyInjector(this);
+		if (config.getPort() == null)
+			injector = new BukkitNettyInjector(this);
+		else
+			nettyServerThread = new WebThread(this);
 		httpRouter = new RouteMatcher();
 		logger.info("Registering route ...");
 		registerRoutes();
 		getServer().getPluginManager().registerEvents(new BukkitListeners(instance), this);
 		
 		// inject when we are ready
-		logger.info("Injecting http server ...");
-		injector.inject();
+		if (config.getPort() == null) {
+			logger.info("Injecting http server ...");
+			injector.inject();
+		} else {
+			logger.info("Start http server ...");
+			try {
+				nettyServerThread.run();
+			} catch (Exception e) {
+				logger.info("HTTP server start failed!");
+			}
+		}
+
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
 		registerMethods();
@@ -135,12 +151,26 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("mineweb")) {
 			if (args.length == 1 && args[0].equalsIgnoreCase("reset")) {
-				/*instance.config().reset();
-				config = PluginConfiguration.load(new File(getDataFolder(), "config.json"), instance);*/
 				config = new PluginConfiguration(new File(getDataFolder(), "config.json"));
 				config.save(instance);
 				sender.sendMessage("MineWebBridge configuration reset!");
 				logger.info("MineWebBridge configuration reset!");
+				return true;
+			}
+			if (args.length == 2 && args[0].equalsIgnoreCase("port")) {
+				config.setPort(Integer.parseInt(args[1]));
+				config.save(instance);
+				nettyServerThread = new WebThread(instance);
+				logger.info("Try to start http server ...");
+				try {
+					nettyServerThread.run();
+				} catch (Exception e) {
+					sender.sendMessage("MineWebBridge port setup failed!");
+					logger.info("HTTP server start failed!");
+					return true;
+				}
+				sender.sendMessage("MineWebBridge port setup!");
+				logger.info("MineWebBridge port setup!");
 				return true;
 			}
 		}

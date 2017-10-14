@@ -18,6 +18,7 @@ public class PluginConfiguration {
 	public String licenseId;
 	public String licenseKey;
 	public String domain;
+	public Integer port;
 	
 	public PluginConfiguration(File path) {
 		this.path = path;
@@ -40,7 +41,7 @@ public class PluginConfiguration {
 				conf.path = path;
 				return conf;
 			} catch (Exception e) {
-				api.logger().warning("Config file is invalid, replacing with a new one");
+				api.logger().warning("Config file is invalid, replacing with a new one (" + e.getMessage() + ")");
 				return new PluginConfiguration(path);
 			} finally {
 				if (reader != null) {

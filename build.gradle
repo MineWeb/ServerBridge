@@ -30,8 +30,10 @@ repositories {
 }
 
 dependencies {
-    compile "com.google.guava:guava:10.0"
-    compile "com.google.code.gson:gson:2.5"
+    compile "com.google.guava:guava:17.0"
+	//compile files('/Users/valentin/Sites/mineweb_bridge/guava-17.0.jar')
+	//compile group: 'com.google.guava', name: 'guava', version: '17.0'
+	compile "com.google.code.gson:gson:2.5"
     compile ("com.comphenix.protocol:ProtocolLib-API:4.0-SNAPSHOT") { 
 		exclude group: "com.comphenix.executors" 
 	}

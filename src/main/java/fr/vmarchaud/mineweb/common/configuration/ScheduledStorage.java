@@ -41,7 +41,7 @@ public class ScheduledStorage{
 				conf.path = path;
 				return conf;
 			} catch (Exception e) {
-				api.logger().warning("Config file is invalid, replacing with a new one");
+				//api.logger().warning("Config file is invalid, replacing with a new one");
 				return new ScheduledStorage(path);
 			} finally {
 				if (reader != null) {
@@ -51,7 +51,7 @@ public class ScheduledStorage{
 				}
 			}
 		} else {
-			api.logger().warning("Cant find a config file, creating it");
+			//api.logger().warning("Cant find a config file, creating it");
 			return new ScheduledStorage(path);
 		}
 	}
