@@ -46,6 +46,7 @@ import fr.vmarchaud.mineweb.common.CommandScheduler;
 import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
+import fr.vmarchaud.mineweb.common.injector.WebThread;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
@@ -63,6 +64,8 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 public class BungeeCore extends Plugin implements ICore {
 	
 	public static ICore		instance;
+	private WebThread nettyServerThread;
+
 	public static ICore get() {
 		return instance;
 	}
@@ -97,7 +100,7 @@ public class BungeeCore extends Plugin implements ICore {
 		logger.info("Loading ...");
 		methods = new HashMap<String, IMethod>();
 		players = new HashSet<String>();
-		injector = new BungeeNettyInjector(this);
+		nettyServerThread = new WebThread(this);
 		httpRouter = new RouteMatcher();
 		logger.info("Registering route ...");
 		registerRoutes();
@@ -105,7 +108,8 @@ public class BungeeCore extends Plugin implements ICore {
 		
 		// inject when we are ready
 		logger.info("Injecting http server ...");
-		injector.inject();
+		nettyServerThread.start();
+
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
 		registerMethods();

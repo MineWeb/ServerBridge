@@ -108,23 +108,15 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		logger.info("Loading ...");
 		methods = new HashMap<String, IMethod>();
 		players = new HashSet<String>();
-		if (config.getPort() == null)
-			injector = new BukkitNettyInjector(this);
-		else
-			nettyServerThread = new WebThread(this);
+		nettyServerThread = new WebThread(this);
 		httpRouter = new RouteMatcher();
 		logger.info("Registering route ...");
 		registerRoutes();
 		getServer().getPluginManager().registerEvents(new BukkitListeners(instance), this);
 		
 		// inject when we are ready
-		if (config.getPort() == null) {
-			logger.info("Injecting http server ...");
-			injector.inject();
-		} else {
-			logger.info("Start http server ...");
-			nettyServerThread.start();
-		}
+		logger.info("Start http server ...");
+		nettyServerThread.start();
 
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
