@@ -81,10 +81,10 @@ public class BungeeNettyInjector extends NettyInjector {
 					ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, new KickStringWriter());
 					ch.pipeline().get(HandlerBoss.class) .setHandler(new InitialHandler(BungeeCord.getInstance(), listener));
 
-					/*if (listener.getClass().getMethod("isProxyProtocol").toString() != null && listener.isProxyProtocol())
-					{
-						ch.pipeline().addFirst(new io.netty.handler.codec.haproxy.HAProxyMessageDecoder.HAProxyMessageDecoder());
-					}*/
+					//if (listener.getClass().getMethod("isProxyProtocol").toString() != null && listener.isProxyProtocol())
+					//{
+					//	ch.pipeline().addFirst(new io.netty.handler.codec.haproxy.HAProxyMessageDecoder.HAProxyMessageDecoder());
+					//}
 				}
 			});
 			injected = true;

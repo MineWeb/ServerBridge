@@ -133,6 +133,7 @@ public class RequestHandler {
 			response.setMsg("Successfully retrieved secret key, now ready !");
 			response.setStatus(true);
 			api.logger().info(String.format("Handshake request %s has been successfully valided (secret: %s)", handshake.getId(), secret));
+			this.refreshKey(secret);
 			
 			return new HttpResponseBuilder().code(HttpResponseStatus.OK).json(api.gson().toJson(response)).build();
 		} catch (Exception e) {
@@ -165,7 +166,7 @@ public class RequestHandler {
 			// parse json to map
 			request = api.gson().fromJson(content, AskRequest.class);
 			// if in debug, request is done in plaintext
-			String tmp = debug ? request.getSigned() : CryptoUtils.decryptAES(request.getSigned(), key, request.getIv());
+			String tmp = debug ? request.getSigned() : CryptoUtils.decryptAES(request.getSigned(), this.key, request.getIv());
 			JsonReader reader = new JsonReader(new StringReader(tmp));
 			reader.setLenient(true);
 			requests = api.gson().fromJson(reader, token);
