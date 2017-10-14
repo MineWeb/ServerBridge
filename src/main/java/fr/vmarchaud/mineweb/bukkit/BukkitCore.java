@@ -74,7 +74,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	public static ICore get() {
 		return instance;
 	}
-	
+
 	private RouteMatcher				httpRouter;
 	private NettyInjector				injector;
 	private WebThread					nettyServerThread;
@@ -84,7 +84,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	private ScheduledStorage			storage;
 	private CommandScheduler			commandScheduler;
 	private BukkitTask					task;
-	
+
 	/** Cached player list to not rely on Reflection on every request **/
 	private HashSet<String>				players;
 	
@@ -123,11 +123,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 			injector.inject();
 		} else {
 			logger.info("Start http server ...");
-			try {
-				nettyServerThread.run();
-			} catch (Exception e) {
-				logger.info("HTTP server start failed!");
-			}
+			nettyServerThread.start();
 		}
 
 		logger.info("Registering methods ...");
@@ -162,9 +158,14 @@ public class BukkitCore extends JavaPlugin implements ICore {
 				config.save(instance);
 				nettyServerThread = new WebThread(instance);
 				logger.info("Try to start http server ...");
-				try {
-					nettyServerThread.run();
-				} catch (Exception e) {
+				nettyServerThread.start();
+
+				// Wait to check if http is started
+				try	{
+					TimeUnit.MILLISECONDS.sleep(5);
+				} catch (Exception e) {}
+
+				if (!nettyServerThread.isAlive()) {
 					sender.sendMessage("MineWebBridge port setup failed!");
 					logger.info("HTTP server start failed!");
 					return true;

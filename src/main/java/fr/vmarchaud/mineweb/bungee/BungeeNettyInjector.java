@@ -31,7 +31,6 @@ import fr.vmarchaud.mineweb.common.injector.JSONAPIChannelDecoder;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ListenerInfo;
@@ -82,10 +81,10 @@ public class BungeeNettyInjector extends NettyInjector {
 					ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, new KickStringWriter());
 					ch.pipeline().get(HandlerBoss.class) .setHandler(new InitialHandler(BungeeCord.getInstance(), listener));
 
-					if (listener.isProxyProtocol())
+					/*if (listener.getClass().getMethod("isProxyProtocol").toString() != null && listener.isProxyProtocol())
 					{
-						ch.pipeline().addFirst(new HAProxyMessageDecoder());
-					}
+						ch.pipeline().addFirst(new io.netty.handler.codec.haproxy.HAProxyMessageDecoder.HAProxyMessageDecoder());
+					}*/
 				}
 			});
 			injected = true;

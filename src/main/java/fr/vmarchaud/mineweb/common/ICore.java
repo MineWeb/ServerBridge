@@ -33,7 +33,7 @@ import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 
 public interface ICore {
-	
+
 	/**
 	 * Get the router that handle http connection
 	 * @return RouteMatcher
