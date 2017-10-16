@@ -39,7 +39,7 @@ public class BukkitGetWhitelistedPlayers implements IMethod {
 	@Override
 	public Object execute(ICore instance, Object... inputs) {
 		Set<OfflinePlayer> wlp = ((Server)instance.getGameServer()).getWhitelistedPlayers();
-		return Stream.of(wlp).map(offplayer -> offplayer.getName()).collect(Collectors.toList());
+		return Stream.of(wlp).map(OfflinePlayer::getName).collect(Collectors.toList());
 	}
 
 }
