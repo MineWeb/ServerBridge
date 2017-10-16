@@ -41,8 +41,8 @@ public class CommandScheduler implements Runnable {
 			if (new Date(command.getTimestamp()).after(now))
 				continue;
 			// if the command need a player to be online and this player isn't connected, continue
-			if (command.getPlayer() != null && !api.getPlayers().contains(command.getPlayer()))
-				continue;
+			//if (command.getPlayer() != null && !api.getPlayers().contains(command.getPlayer()))
+			//	continue;
 			// otherwise run the command and remove it from the list
 			api.runCommand(command.getCommand());
 			it.remove();
