@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.ScheduledCommand;
