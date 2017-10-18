@@ -25,7 +25,6 @@ package fr.vmarchaud.mineweb.bukkit;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,7 +33,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.vmarchaud.mineweb.common.injector.NettyServer;
 import fr.vmarchaud.mineweb.common.injector.WebThread;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -55,7 +53,6 @@ import fr.vmarchaud.mineweb.common.RequestHandler;
 import fr.vmarchaud.mineweb.common.CommandScheduler;
 import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
-import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
@@ -76,7 +73,6 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	}
 
 	private RouteMatcher				httpRouter;
-	private NettyInjector				injector;
 	private WebThread					nettyServerThread;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;

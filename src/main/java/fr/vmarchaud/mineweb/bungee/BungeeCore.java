@@ -45,7 +45,6 @@ import fr.vmarchaud.mineweb.common.RequestHandler;
 import fr.vmarchaud.mineweb.common.CommandScheduler;
 import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
-import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.WebThread;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
@@ -71,7 +70,6 @@ public class BungeeCore extends Plugin implements ICore {
 	}
 
 	private RouteMatcher				httpRouter;
-	private NettyInjector				injector;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
 	private PluginConfiguration			config;
