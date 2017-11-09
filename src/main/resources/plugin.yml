@@ -12,6 +12,8 @@ commands:
   mineweb reset:
     description: Reset plugin configuration
     usage: /mineweb reset
+    permission: mineweb.reset
   mineweb port:
     description: Setup custom port
     usage: /mineweb port <port>
+    permission: mineweb.port
