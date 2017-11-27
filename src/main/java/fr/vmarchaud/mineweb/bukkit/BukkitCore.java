@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import fr.vmarchaud.mineweb.common.injector.WebThread;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.command.CommandSender;
@@ -135,6 +136,8 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("mineweb")) {
 			if (args.length == 1 && args[0].equalsIgnoreCase("reset")) {
+				if ((sender instanceof Player) && (!sender.isOp()) && (!sender.hasPermission("mineweb.reset")))
+					return false;
 				config = new PluginConfiguration(new File(getDataFolder(), "config.json"));
 				config.save(instance);
 				sender.sendMessage("MineWebBridge configuration reset!");
@@ -142,6 +145,8 @@ public class BukkitCore extends JavaPlugin implements ICore {
 				return true;
 			}
 			if (args.length == 2 && args[0].equalsIgnoreCase("port")) {
+				if ((sender instanceof Player) && (!sender.isOp()) && (!sender.hasPermission("mineweb.port")))
+					return false;
 				config.setPort(Integer.parseInt(args[1]));
 				config.save(instance);
 				nettyServerThread = new WebThread(instance);
