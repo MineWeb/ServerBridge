@@ -15,8 +15,6 @@ public class PluginConfiguration {
 
 	public String logLevel = "FINE";
 	public String secretkey;
-	public String licenseId;
-	public String licenseKey;
 	public String domain;
 	public Integer port;
 	

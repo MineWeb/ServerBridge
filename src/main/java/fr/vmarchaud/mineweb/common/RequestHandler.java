@@ -27,8 +27,6 @@ import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -37,12 +35,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
-import fr.vmarchaud.mineweb.common.interactor.MinewebInteractor;
 import fr.vmarchaud.mineweb.common.interactor.requests.AskRequest;
 import fr.vmarchaud.mineweb.common.interactor.requests.HandshakeRequest;
 import fr.vmarchaud.mineweb.common.interactor.responses.AskResponse;
 import fr.vmarchaud.mineweb.common.interactor.responses.HandshakeResponse;
-import fr.vmarchaud.mineweb.common.interactor.responses.RetrieveKeyResponse;
 import fr.vmarchaud.mineweb.utils.CryptoUtils;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import io.netty.buffer.ByteBuf;
@@ -92,8 +88,8 @@ public class RequestHandler {
 		String content = buf.toString(buf.readerIndex(), buf.readableBytes(), Charset.forName("UTF-8"));
 		HandshakeRequest handshake = api.gson().fromJson(content, HandshakeRequest.class);
 		
-		api.logger().info(String.format("New Handshake id: %s (%s, %s, %s)",
-				handshake.getId(), handshake.getLicenseId(), handshake.getLicenseKey(), handshake.getDomain()));
+		api.logger().info(String.format("New Handshake id: %s (%s, %s)",
+				handshake.getId(), handshake.getSecretKey(), handshake.getDomain()));
 		
 		if (!handshake.isValid()) {
 			api.logger().info(String.format("Handshake failed id: %s (reason: invalid params)", handshake.getId()));
@@ -105,29 +101,11 @@ public class RequestHandler {
 			return new HttpResponseBuilder().code(HttpResponseStatus.FORBIDDEN).build();
 		}
 		try {
-			RetrieveKeyResponse keyResponse = MinewebInteractor.retrieveKey(api, handshake);
 			HandshakeResponse response = new HandshakeResponse();
 			
-			// if the key isn't send by the api, the data sent by the cms are invalid
-			if (keyResponse.getSecret_key() == null) {
-				response.setMsg(keyResponse.getMsg());
-				response.setStatus(response.isStatus());
-				api.logger().info(String.format("Handshake failed id: %s (reason: %s)", handshake.getId(), keyResponse.getMsg()));
-				return new HttpResponseBuilder().code(HttpResponseStatus.BAD_REQUEST).json(api.gson().toJson(response)).build();
-			}
-			
-			String secret = CryptoUtils.decryptRSA(keyResponse.getSecret_key(), MinewebInteractor.MINEWEB_PUBLIC_KEY).substring(0, 16);
-			if (secret == null) {
-				api.logger().info(String.format("Handshake failed for request %s (reason: Cant decrypt secret)", handshake.getId()));
-				response.setMsg("Cant decrypt secret from API");
-				response.setStatus(false);
-				return new HttpResponseBuilder().code(HttpResponseStatus.INTERNAL_SERVER_ERROR).json(api.gson().toJson(response)).build();
-			}
-			
 			// save all the stuff inside the configuration
+			String secret = handshake.getSecretKey();
 			api.config().setSecretkey(secret);
-			api.config().setLicenseId(handshake.getLicenseId());
-			api.config().setLicenseKey(handshake.getLicenseKey());
 			api.config().setDomain(handshake.getDomain());
 			api.config().save(api);
 			response.setMsg("Successfully retrieved secret key, now ready !");
