@@ -1,20 +1,9 @@
-buildscript {
-  repositories {
-     mavenCentral()
-  }
-
-  dependencies {
-     classpath 'me.tatarka:gradle-retrolambda:3.2.5'
-  }
-}
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
-apply plugin: 'me.tatarka.retrolambda'
 
 group = 'fr.vmarchaud'
-version = '2.0.0'
+version = '3.0.0'
 
 description = "mineweb_bridge"
 
@@ -27,6 +16,9 @@ repositories {
     maven { url "http://repo.dmulloy2.net/content/groups/public/" }
 	mavenCentral()
 	jcenter()
+	flatDir {
+		dirs 'dependencies'
+	}
 }
 
 dependencies {
@@ -34,13 +26,16 @@ dependencies {
 	//compile files('/Users/valentin/Sites/mineweb_bridge/guava-17.0.jar')
 	//compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compile "com.google.code.gson:gson:2.5"
-    compile ("com.comphenix.protocol:ProtocolLib-API:4.0-SNAPSHOT") { 
+    compile ("com.comphenix.protocol:ProtocolLib:4.4.0") {
 		exclude group: "com.comphenix.executors" 
 	}
 	compile 'com.annimon:stream:1.1.1'
-    compileOnly "org.spigotmc:spigot:1.8-R0.1-SNAPSHOT"
-    compileOnly "org.projectlombok:lombok:1.16.6"
-    compileOnly "net.md-5:bungeecord-bootstrap:1.8-SNAPSHOT"
+	compile 'javax.xml.bind:jaxb-api:2.3.0'
+    compileOnly "org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT"
+	compileOnly 'org.projectlombok:lombok:1.18.10'
+	annotationProcessor 'org.projectlombok:lombok:1.18.10'
+	compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.43.Final'
+	compileOnly fileTree(include: ['*.jar'], dir: 'dependencies')
 }
 
 task fatJar(type: Jar) {

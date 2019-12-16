@@ -1,26 +1,3 @@
-@rem ***************************************************************************
-@rem MIT License
-@rem
-@rem Copyright (c) 2016 Valentin 'ThisIsMac' Marchaud
-@rem
-@rem Permission is hereby granted, free of charge, to any person obtaining a copy
-@rem of this software and associated documentation files (the "Software"), to deal
-@rem in the Software without restriction, including without limitation the rights
-@rem to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-@rem copies of the Software, and to permit persons to whom the Software is
-@rem furnished to do so, subject to the following conditions:
-@rem
-@rem The above copyright notice and this permission notice shall be included in all
-@rem copies or substantial portions of the Software.
-@rem
-@rem THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-@rem IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-@rem FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-@rem AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-@rem LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-@rem OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-@rem SOFTWARE.
-@rem ***************************************************************************
 @if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
 @rem
@@ -37,7 +14,7 @@ set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS=
+set DEFAULT_JVM_OPTS="-Xmx64m"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
@@ -72,7 +49,6 @@ goto fail
 @rem Get command-line arguments, handling Windows variants
 
 if not "%OS%" == "Windows_NT" goto win9xME_args
-if "%@eval[2+2]" == "4" goto 4NT_args
 
 :win9xME_args
 @rem Slurp the command line arguments.
@@ -83,11 +59,6 @@ set _SKIP=2
 if "x%~1" == "x" goto execute
 
 set CMD_LINE_ARGS=%*
-goto execute
-
-:4NT_args
-@rem Get arguments from the 4NT Shell from JP Software
-set CMD_LINE_ARGS=%$
 
 :execute
 @rem Setup the command line
