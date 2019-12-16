@@ -1,4 +1,14 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+	}
+}
+
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 
@@ -27,7 +37,9 @@ dependencies {
 	//compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compile "com.google.code.gson:gson:2.5"
     compile ("com.comphenix.protocol:ProtocolLib:4.4.0") {
-		exclude group: "com.comphenix.executors" 
+		exclude group: "com.comphenix.executors"
+		// For
+		exclude group: "cglib"
 	}
 	compile 'com.annimon:stream:1.1.1'
 	compile 'javax.xml.bind:jaxb-api:2.3.0'
@@ -36,15 +48,6 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.10'
 	compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.43.Final'
 	compileOnly fileTree(include: ['*.jar'], dir: 'dependencies')
-}
-
-task fatJar(type: Jar) {
-    from {
-    	configurations.compile.collect {
-    		it.isDirectory() ? it : zipTree(it)
-    	}
-    }
-    with jar
 }
 
 task moveIntoBukkit(type: Copy) {
