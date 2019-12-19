@@ -1,6 +1,9 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+    branches:    
+      - master
 
 jobs:
   build:
@@ -15,3 +18,15 @@ jobs:
         java-version: 1.8
     - name: Build with Gradle
       run: ./gradlew build
+    - uses: webfactory/ssh-agent@v0.1.1
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+    - name: Push jar
+      run: |
+        mv ./build/libs/*.jar ./mineweb_bridge-$VERSION.jar
+        git add mineweb_bridge-$VERSION.jar
+        git commit -m "build: Add mineweb_bridge-$VERSION.jar"
+        git push $REPO master
+      env:
+        REPO: git@github.com:${{github.repository}}.git
+        VERSION: "3.0.0"
