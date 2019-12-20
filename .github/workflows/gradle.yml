@@ -24,6 +24,8 @@ jobs:
     - name: Push jar
       run: |
         mv ./build/libs/*.jar ./mineweb_bridge-$VERSION.jar
+        git config --global user.email "paypal@mineweb.org"
+        git config --global user.name "MineWeb Bot"
         git add mineweb_bridge-$VERSION.jar
         git commit -m "build: Add mineweb_bridge-$VERSION.jar"
         git push $REPO master
