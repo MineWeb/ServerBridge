@@ -2,6 +2,8 @@ name: MinewebBridge
 main: fr.vmarchaud.mineweb.bukkit.BukkitCore
 version: 2.0.0
 author: ThisIsMac
+softdepend:
+  - ProtocolLib
 commands:
   mineweb:
     description: Commands to manage MineWebBridge
