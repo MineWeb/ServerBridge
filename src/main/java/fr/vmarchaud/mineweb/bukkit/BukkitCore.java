@@ -23,9 +23,30 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bukkit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import fr.vmarchaud.mineweb.bukkit.methods.*;
+import fr.vmarchaud.mineweb.common.CommandScheduler;
+import fr.vmarchaud.mineweb.common.ICore;
+import fr.vmarchaud.mineweb.common.IMethod;
+import fr.vmarchaud.mineweb.common.RequestHandler;
+import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
+import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
+import fr.vmarchaud.mineweb.common.injector.NettyInjector;
+import fr.vmarchaud.mineweb.common.injector.WebThread;
+import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
+import fr.vmarchaud.mineweb.common.methods.*;
+import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
+import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,41 +54,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import fr.vmarchaud.mineweb.common.injector.NettyServer;
-import fr.vmarchaud.mineweb.common.injector.WebThread;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.Command;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetBannedPlayers;
-import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMOTD;
-import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetMaxPlayers;
-import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetVersion;
-import fr.vmarchaud.mineweb.bukkit.methods.BukkitGetWhitelistedPlayers;
-import fr.vmarchaud.mineweb.common.ICore;
-import fr.vmarchaud.mineweb.common.IMethod;
-import fr.vmarchaud.mineweb.common.RequestHandler;
-import fr.vmarchaud.mineweb.common.CommandScheduler;
-import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
-import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
-import fr.vmarchaud.mineweb.common.injector.NettyInjector;
-import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
-import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
-import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
-import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
-import fr.vmarchaud.mineweb.common.methods.CommonGetTimestamp;
-import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
-import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
-import fr.vmarchaud.mineweb.common.methods.CommonRunCommand;
-import fr.vmarchaud.mineweb.common.methods.CommonScheduledCommand;
-import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
-import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 
 public class BukkitCore extends JavaPlugin implements ICore {
 	
@@ -109,10 +95,17 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		logger.info("Loading ...");
 		methods = new HashMap<String, IMethod>();
 		players = new HashSet<String>();
-		if (config.getPort() == null)
+
+		if (config.getPort() == null) {
+			if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null) {
+				throw new RuntimeException("The bridge requires ProtocolLib to run on server's port");
+			}
+
 			injector = new BukkitNettyInjector(this);
-		else
+		} else {
 			nettyServerThread = new WebThread(this);
+		}
+
 		httpRouter = new RouteMatcher();
 		logger.info("Registering route ...");
 		registerRoutes();
