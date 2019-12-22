@@ -6,6 +6,7 @@ authors:
   - Shyrogan
 softdepend:
   - ProtocolLib
+load: STARTUP
 commands:
   mineweb:
     description: Commands to manage MineWebBridge
