@@ -23,9 +23,6 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.JSONAPIChannelDecoder;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
@@ -37,11 +34,10 @@ import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
-import net.md_5.bungee.protocol.KickStringWriter;
-import net.md_5.bungee.protocol.LegacyDecoder;
-import net.md_5.bungee.protocol.MinecraftDecoder;
-import net.md_5.bungee.protocol.MinecraftEncoder;
-import net.md_5.bungee.protocol.Protocol;
+import net.md_5.bungee.protocol.*;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public class BungeeNettyInjector extends NettyInjector {
 
@@ -60,6 +56,7 @@ public class BungeeNettyInjector extends NettyInjector {
 			Class<PipelineUtils> server = PipelineUtils.class;
 			Field field = server.getDeclaredField("SERVER_CHILD");
 			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			field.setAccessible(true);
 			modifiersField.setAccessible(true);
 			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
