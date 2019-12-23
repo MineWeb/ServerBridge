@@ -61,6 +61,11 @@ public class PluginConfiguration {
 	 */
 	public void save(ICore api) {
 		try {
+			// Create the folder
+			new File(path.getParent()).mkdirs();
+			// Create the file
+			path.createNewFile();
+			// Write it
 			String config = api.gson().toJson(this);
 			FileWriter writer = new FileWriter(path);
 			writer.write(config);
