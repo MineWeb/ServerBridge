@@ -97,7 +97,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		players = new HashSet<String>();
 
 		if (config.getPort() == null) {
-			if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null) {
+			if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
 				throw new RuntimeException("The bridge requires ProtocolLib to run on server's port");
 			}
 
