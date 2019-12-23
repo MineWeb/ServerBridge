@@ -2,7 +2,6 @@ package fr.vmarchaud.mineweb.common.injector;
 
 import fr.vmarchaud.mineweb.common.ICore;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 
 public class WebThread extends Thread {
 
@@ -20,7 +19,6 @@ public class WebThread extends Thread {
         try {
             webServer.start();
         } catch (Exception e) {
-            Bukkit.getConsoleSender().sendMessage("HTTP server start failed! (" + e.getMessage() + ")");
             api.logger().info("HTTP server start failed! (" + e.getMessage() + ")");
             this.interrupt();
         }
