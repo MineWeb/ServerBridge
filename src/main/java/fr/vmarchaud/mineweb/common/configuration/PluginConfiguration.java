@@ -27,7 +27,7 @@ public class PluginConfiguration {
 	 * Load the configuration from the file
 	 * 
 	 * @param path object representing the path of the file
-	 * @param api  interface for logging and use gson instance
+	 * @param api interface for logging and use gson instance
 	 */
 	public static PluginConfiguration load(File path, ICore api) {
 		if (path.exists()) {
