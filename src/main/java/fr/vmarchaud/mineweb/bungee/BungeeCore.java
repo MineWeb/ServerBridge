@@ -48,7 +48,7 @@ import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
 import fr.vmarchaud.mineweb.common.injector.WebThread;
 import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
-imimport fr.vmarchaud.mineweb.common.methods.*;
+import fr.vmarchaud.mineweb.common.methods.*;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import net.md_5.bungee.api.plugin.Plugin;
