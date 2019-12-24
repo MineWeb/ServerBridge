@@ -1,12 +1,12 @@
 package fr.vmarchaud.mineweb.common.configuration;
 
+import fr.vmarchaud.mineweb.common.ICore;
+import lombok.Data;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import fr.vmarchaud.mineweb.common.ICore;
-import lombok.Data;
 
 @Data
 public class PluginConfiguration {
@@ -24,11 +24,8 @@ public class PluginConfiguration {
 	
 	/**
 	 * Load the configuration from the file
-	 * @param File object representing the path of the file
-	 * @param ICore interface for logging and use gson instance
-	 * 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * @param path object representing the path of the file
+	 * @param api interface for logging and use gson instance
 	 */
 	public static PluginConfiguration load(File path, ICore api) {
 		if (path.exists()) {
@@ -45,21 +42,30 @@ public class PluginConfiguration {
 				if (reader != null) {
 					try {
 						reader.close();
-					} catch (IOException e) {}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		} else {
 			api.logger().warning("Cant find a config file, creating it");
-			return new PluginConfiguration(path);
+			PluginConfiguration config = new PluginConfiguration(path);
+			config.save(api);
+			return config;
 		}
 	}
 	
 	/**
 	 * Save the configuration to the file
-	 * @param ICore interface for logging and use gson instance
+	 * @param api interface for logging and use gson instance
 	 */
 	public void save(ICore api) {
 		try {
+			// Create the folder
+			new File(path.getParent()).mkdirs();
+			// Create the file
+			path.createNewFile();
+			// Write it
 			String config = api.gson().toJson(this);
 			FileWriter writer = new FileWriter(path);
 			writer.write(config);

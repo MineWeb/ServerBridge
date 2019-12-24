@@ -23,6 +23,26 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
+import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
+import fr.vmarchaud.mineweb.common.CommandScheduler;
+import fr.vmarchaud.mineweb.common.ICore;
+import fr.vmarchaud.mineweb.common.IMethod;
+import fr.vmarchaud.mineweb.common.RequestHandler;
+import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
+import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
+import fr.vmarchaud.mineweb.common.injector.NettyInjector;
+import fr.vmarchaud.mineweb.common.injector.WebThread;
+import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
+import fr.vmarchaud.mineweb.common.methods.*;
+import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
+import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
+import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,33 +53,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
-import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
-import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
-import fr.vmarchaud.mineweb.common.ICore;
-import fr.vmarchaud.mineweb.common.IMethod;
-import fr.vmarchaud.mineweb.common.RequestHandler;
-import fr.vmarchaud.mineweb.common.CommandScheduler;
-import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
-import fr.vmarchaud.mineweb.common.configuration.ScheduledStorage;
-import fr.vmarchaud.mineweb.common.injector.NettyInjector;
-import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
-import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerCount;
-import fr.vmarchaud.mineweb.common.methods.CommonGetPlayerList;
-import fr.vmarchaud.mineweb.common.methods.CommonGetSystemStats;
-import fr.vmarchaud.mineweb.common.methods.CommonGetTimestamp;
-import fr.vmarchaud.mineweb.common.methods.CommonIsConnected;
-import fr.vmarchaud.mineweb.common.methods.CommonPluginType;
-import fr.vmarchaud.mineweb.common.methods.CommonRunCommand;
-import fr.vmarchaud.mineweb.common.methods.CommonScheduledCommand;
-import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
-import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
-
 public class BungeeCore extends Plugin implements ICore {
 	
 	public static ICore		instance;
@@ -69,6 +62,7 @@ public class BungeeCore extends Plugin implements ICore {
 
 	private RouteMatcher				httpRouter;
 	private NettyInjector				injector;
+	private WebThread nettyServerThread;
 	private HashMap<String, IMethod>	methods;
 	private RequestHandler				requestHandler;
 	private PluginConfiguration			config;
@@ -104,8 +98,14 @@ public class BungeeCore extends Plugin implements ICore {
 		getProxy().getPluginManager().registerListener(this, new BungeeListeners(instance));
 		
 		// inject when we are ready
-		logger.info("Injecting http server ...");
-		injector.inject();
+		if(config.port == null) {
+			logger.info("Injecting http server ...");
+			injector.inject();
+		} else {
+			logger.info("Starting http server thread ...");
+			nettyServerThread = new WebThread(this);
+			nettyServerThread.start();
+		}
 		logger.info("Registering methods ...");
 		requestHandler = new RequestHandler(instance);
 		registerMethods();
@@ -225,5 +225,9 @@ public class BungeeCore extends Plugin implements ICore {
 	@Override
 	public CommandScheduler getCommandScheduler() {
 		return commandScheduler;
+	}
+
+	public NettyInjector getInjector() {
+		return injector;
 	}
 }

@@ -13,7 +13,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'fr.vmarchaud'
-version = '3.0.0'
+version = '3.0.1'
 
 description = "mineweb_bridge"
 
@@ -24,6 +24,7 @@ repositories {
 	mavenLocal()
     maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
     maven { url "http://repo.dmulloy2.net/content/groups/public/" }
+	maven { url 'https://repo.spongepowered.org/maven' }
 	mavenCentral()
 	jcenter()
 	flatDir {
@@ -32,17 +33,18 @@ repositories {
 }
 
 dependencies {
-    compile "com.google.guava:guava:17.0"
+	compileOnly "com.google.guava:guava:17.0"
 	//compile files('/Users/valentin/Sites/mineweb_bridge/guava-17.0.jar')
 	//compile group: 'com.google.guava', name: 'guava', version: '17.0'
-	compile "com.google.code.gson:gson:2.5"
-    compile ("com.comphenix.protocol:ProtocolLib:4.4.0") {
+	compileOnly "com.google.code.gson:gson:2.5"
+	compileOnly ("com.comphenix.protocol:ProtocolLib:4.4.0") {
 		exclude group: "com.comphenix.executors"
 		// For
 		exclude group: "cglib"
 	}
 	compile 'com.annimon:stream:1.1.1'
 	compile 'javax.xml.bind:jaxb-api:2.3.0'
+	compileOnly 'org.spongepowered:spongeapi:7.1.0'
     compileOnly "org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT"
 	compileOnly 'org.projectlombok:lombok:1.18.10'
 	annotationProcessor 'org.projectlombok:lombok:1.18.10'
