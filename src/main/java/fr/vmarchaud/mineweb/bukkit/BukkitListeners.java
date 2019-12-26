@@ -29,6 +29,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 
 import fr.vmarchaud.mineweb.common.ICore;
 
@@ -57,4 +58,13 @@ public class BukkitListeners implements Listener {
 		// update our cached player list
 		api.getPlayers().remove(e.getPlayer().getName());
 	}
+	
+	@EventHandler
+    public void onPing(ServerListPingEvent e) {
+        String motd = api.config().motd;
+        if(motd == null || motd.length() == 0)
+        	return;
+        motd = motd.replace("&", "§").replace("{PLAYERS}", String.valueOf(api.getPlayers().size()));
+        e.setMotd(motd);
+    }
 }

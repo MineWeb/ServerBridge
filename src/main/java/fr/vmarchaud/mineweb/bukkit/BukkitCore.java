@@ -198,6 +198,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		methods.put("RUN_COMMAND", new CommonRunCommand());
 		methods.put("RUN_SCHEDULED_COMMAND", new CommonScheduledCommand());
 		methods.put("GET_SERVER_TIMESTAMP", new CommonGetTimestamp());
+		methods.put("SET_MOTD", new CommonSetMotd());
 		
 		// bukkit methods
 		methods.put("GET_BANNED_PLAYERS", new BukkitGetBannedPlayers());

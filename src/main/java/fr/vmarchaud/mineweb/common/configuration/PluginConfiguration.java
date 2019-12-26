@@ -10,20 +10,22 @@ import java.io.IOException;
 
 @Data
 public class PluginConfiguration {
-	
+
 	public transient File path;
 
 	public String logLevel = "FINE";
 	public String secretkey;
+	public String motd;
 	public String domain;
 	public Integer port;
-	
+
 	public PluginConfiguration(File path) {
 		this.path = path;
 	}
-	
+
 	/**
 	 * Load the configuration from the file
+	 * 
 	 * @param path object representing the path of the file
 	 * @param api interface for logging and use gson instance
 	 */
@@ -54,9 +56,10 @@ public class PluginConfiguration {
 			return config;
 		}
 	}
-	
+
 	/**
 	 * Save the configuration to the file
+	 * 
 	 * @param api interface for logging and use gson instance
 	 */
 	public void save(ICore api) {

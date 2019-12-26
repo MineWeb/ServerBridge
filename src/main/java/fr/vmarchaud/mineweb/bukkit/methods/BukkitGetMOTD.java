@@ -34,7 +34,10 @@ public class BukkitGetMOTD implements IMethod {
 
 	@Override
 	public Object execute(ICore instance, Object... inputs) {
-		return ((Server)instance.getGameServer()).getMotd();
+	
+		if (instance.config().getMotd() == null || instance.config().getMotd().length() == 0)
+			return ((Server)instance.getGameServer()).getMotd();
+		return instance.config().getMotd();
 	}
 
 }

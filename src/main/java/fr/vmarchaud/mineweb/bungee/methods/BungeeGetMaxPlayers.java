@@ -25,8 +25,10 @@ package fr.vmarchaud.mineweb.bungee.methods;
 
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
+import fr.vmarchaud.mineweb.common.MethodHandler;
 import net.md_5.bungee.api.ProxyServer;
 
+@MethodHandler
 public class BungeeGetMaxPlayers implements IMethod {
 
 	@Override

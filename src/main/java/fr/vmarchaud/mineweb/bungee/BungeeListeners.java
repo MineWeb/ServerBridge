@@ -26,9 +26,12 @@ package fr.vmarchaud.mineweb.bungee;
 
 import fr.vmarchaud.mineweb.common.ICore;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -57,4 +60,18 @@ public class BungeeListeners implements Listener {
 		// update our cached player list
 		api.getPlayers().remove(e.getPlayer().getName());
 	}
+	
+	
+	@EventHandler
+    public void onPing(ProxyPingEvent e) {
+        String motd = api.config().motd;
+        if(motd == null || motd.length() == 0)
+        	return;
+        ServerPing response = e.getResponse();
+        motd = motd.replace("&", "§").replace("{PLAYERS}", String.valueOf(api.getPlayers().size()));
+        response.setDescriptionComponent(new TextComponent(motd));
+        e.setResponse(response);
+    }
+
+
 }

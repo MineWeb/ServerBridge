@@ -23,8 +23,19 @@
  *******************************************************************************/
 package fr.vmarchaud.mineweb.bungee;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMOTD;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetMaxPlayers;
 import fr.vmarchaud.mineweb.bungee.methods.BungeeGetVersion;
@@ -42,16 +53,6 @@ import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BungeeCore extends Plugin implements ICore {
 	
@@ -145,6 +146,7 @@ public class BungeeCore extends Plugin implements ICore {
 		methods.put("RUN_COMMAND", new CommonRunCommand());
 		methods.put("RUN_SCHEDULED_COMMAND", new CommonScheduledCommand());
 		methods.put("GET_SERVER_TIMESTAMP", new CommonGetTimestamp());
+		methods.put("SET_MOTD", new CommonSetMotd());
 		
 		// bungee methods
 		methods.put("GET_MAX_PLAYERS", new BungeeGetMaxPlayers());
