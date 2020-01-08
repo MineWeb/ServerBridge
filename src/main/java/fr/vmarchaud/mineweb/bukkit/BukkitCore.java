@@ -38,6 +38,8 @@ import fr.vmarchaud.mineweb.common.injector.router.RouteMatcher;
 import fr.vmarchaud.mineweb.common.methods.*;
 import fr.vmarchaud.mineweb.utils.CustomLogFormatter;
 import fr.vmarchaud.mineweb.utils.http.HttpResponseBuilder;
+import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -71,6 +73,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	private ScheduledStorage			storage;
 	private CommandScheduler			commandScheduler;
 	private BukkitTask					task;
+	private boolean                     protocolLibEnabled;
 
 	/** Cached player list to not rely on Reflection on every request **/
 	private HashSet<String>				players;
@@ -88,6 +91,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		// load config
 		config = PluginConfiguration.load(new File(getDataFolder(), "config.json"), instance);
 		storage = ScheduledStorage.load(new File(getDataFolder(), "commands.json"), instance);
+		protocolLibEnabled = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
 		// setup logger
 		setupLogger();
 		
@@ -95,12 +99,11 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		logger.info("Loading ...");
 		methods = new HashMap<String, IMethod>();
 		players = new HashSet<String>();
-
-		if (config.getPort() == null) {
-			if (!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
-				throw new RuntimeException("The bridge requires ProtocolLib to run on server's port");
-			}
-
+		
+		if(!protocolLibEnabled)
+			logger.warning("The bridge requires ProtocolLib to run on server's port");
+		
+		if (config.getPort() == null && protocolLibEnabled) {
 			injector = new BukkitNettyInjector(this);
 		} else {
 			nettyServerThread = new WebThread(this);
@@ -112,7 +115,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 		getServer().getPluginManager().registerEvents(new BukkitListeners(instance), this);
 		
 		// inject when we are ready
-		if (config.getPort() == null) {
+		if (config.getPort() == null && protocolLibEnabled) {
 			logger.info("Injecting http server ...");
 			injector.inject();
 		} else {
@@ -145,7 +148,7 @@ public class BukkitCore extends JavaPlugin implements ICore {
 					return false;
 				config = new PluginConfiguration(new File(getDataFolder(), "config.json"));
 				config.save(instance);
-				sender.sendMessage("MineWebBridge configuration reset!");
+				sender.sendMessage(ChatColor.GREEN + "MineWebBridge configuration reset!");
 				logger.info("MineWebBridge configuration reset!");
 				return true;
 			}
@@ -162,13 +165,16 @@ public class BukkitCore extends JavaPlugin implements ICore {
 				try	{
 					TimeUnit.MILLISECONDS.sleep(5);
 				} catch (Exception e) {}
-
+				if(protocolLibEnabled)
+					sender.sendMessage(ChatColor.GRAY +"If you want to use the default server port, please do not make this command and let the website make the connection and restore with the command /mineweb reset");
+				else
+					sender.sendMessage(ChatColor.GRAY +"If you want to use the default server port, please install the plugin : ProtocolLibs");
 				if (!nettyServerThread.isAlive()) {
-					sender.sendMessage("MineWebBridge port setup failed!");
+					sender.sendMessage(ChatColor.RED + "MineWebBridge port setup failed!");
 					logger.info("HTTP server start failed!");
 					return true;
 				}
-				sender.sendMessage("MineWebBridge port setup!");
+				sender.sendMessage(ChatColor.GREEN + "MineWebBridge port setup!");
 				logger.info("MineWebBridge port setup!");
 				return true;
 			}

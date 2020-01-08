@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
+
 @Data
 public class PluginConfiguration {
 
