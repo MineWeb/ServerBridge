@@ -29,4 +29,4 @@ jobs:
         git push $REPO master
       env:
         REPO: git@github.com:${{github.repository}}.git
-        VERSION: "3.0.1"
+        VERSION: "3.0.3"
