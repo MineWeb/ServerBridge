@@ -14,5 +14,5 @@ You will received response serialized, signed will be ```{ "signed": "[{\"name\"
 
 ## Methods available 
 
-For bukkit check here : https://github.com/vmarchaud/mineweb_bridge/blob/master/src/main/java/fr/vmarchaud/mineweb/bukkit/BukkitCore.java#L144
-For bungee check here https://github.com/vmarchaud/mineweb_bridge/blob/master/src/main/java/fr/vmarchaud/mineweb/bungee/BungeeCore.java#L138
+For bukkit check here : https://github.com/vmarchaud/mineweb_bridge/blob/master/src/main/java/fr/vmarchaud/mineweb/bukkit/BukkitCore.java#L191
+For bungee check here https://github.com/vmarchaud/mineweb_bridge/blob/master/src/main/java/fr/vmarchaud/mineweb/bungee/BungeeCore.java#L139
