@@ -1,12 +1,12 @@
 package fr.vmarchaud.mineweb.common.configuration;
 
-import fr.vmarchaud.mineweb.common.ICore;
-import lombok.Data;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import fr.vmarchaud.mineweb.common.ICore;
+import lombok.Data;
 
 @Data
 public class PluginConfiguration {
