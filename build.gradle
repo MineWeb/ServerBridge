@@ -13,7 +13,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'fr.vmarchaud'
-version = '3.0.3'
+version = '3.0.4'
 
 description = "mineweb_bridge"
 
@@ -37,7 +37,7 @@ dependencies {
 	//compile files('/Users/valentin/Sites/mineweb_bridge/guava-17.0.jar')
 	//compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compileOnly "com.google.code.gson:gson:2.5"
-	compileOnly ("com.comphenix.protocol:ProtocolLib:4.4.0") {
+	compileOnly ("com.comphenix.protocol:ProtocolLib:4.5.0") {
 		exclude group: "com.comphenix.executors"
 		// For
 		exclude group: "cglib"
@@ -45,7 +45,7 @@ dependencies {
 	compile 'com.annimon:stream:1.1.1'
 	compile 'javax.xml.bind:jaxb-api:2.3.0'
 	compileOnly 'org.spongepowered:spongeapi:7.1.0'
-    compileOnly "org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT"
+    compileOnly "org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT"
 	compileOnly 'org.projectlombok:lombok:1.18.10'
 	annotationProcessor 'org.projectlombok:lombok:1.18.10'
 	compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.43.Final'
