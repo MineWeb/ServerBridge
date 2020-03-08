@@ -24,11 +24,10 @@
 package fr.vmarchaud.mineweb.bukkit.methods;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
 import fr.vmarchaud.mineweb.common.MethodHandler;
@@ -39,7 +38,7 @@ public class BukkitGetWhitelistedPlayers implements IMethod {
 	@Override
 	public Object execute(ICore instance, Object... inputs) {
 		Set<OfflinePlayer> wlp = ((Server)instance.getGameServer()).getWhitelistedPlayers();
-		return Stream.of(wlp).map(OfflinePlayer::getName).collect(Collectors.toList());
+		return wlp.stream().map(OfflinePlayer::getName).collect(Collectors.toList());
 	}
 
 }

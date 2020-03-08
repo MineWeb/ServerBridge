@@ -24,9 +24,8 @@
 package fr.vmarchaud.mineweb.bukkit.methods;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 
@@ -40,7 +39,7 @@ public class BukkitGetBannedPlayers implements IMethod {
 	@Override
 	public Object execute(ICore instance, Object... inputs) {
 		Set<OfflinePlayer> wlp = ((Server)instance.getGameServer()).getBannedPlayers();
-		return Stream.of(wlp).map(OfflinePlayer::getName).collect(Collectors.toList());
+		return wlp.stream().map(OfflinePlayer::getName).collect(Collectors.toList());
 	}
 
 }
