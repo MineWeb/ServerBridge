@@ -13,7 +13,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'fr.vmarchaud'
-version = '3.0.5'
+version = '3.0.6'
 
 description = "mineweb_bridge"
 
@@ -37,7 +37,7 @@ dependencies {
 	//compile files('/Users/valentin/Sites/mineweb_bridge/guava-17.0.jar')
 	//compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compileOnly "com.google.code.gson:gson:2.5"
-	compileOnly ("com.comphenix.protocol:ProtocolLib:4.5.0") {
+	compileOnly ("com.comphenix.protocol:ProtocolLib:4.5.1") {
 		exclude group: "com.comphenix.executors"
 		// For
 		exclude group: "cglib"
