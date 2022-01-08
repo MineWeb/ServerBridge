@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import fr.vmarchaud.mineweb.common.ICore;
 import lombok.Data;
@@ -18,6 +19,8 @@ public class PluginConfiguration {
 	public String motd;
 	public String domain;
 	public Integer port;
+	public List<String> whitelistedCommands;
+	public boolean useBlacklist;
 
 	public PluginConfiguration(File path) {
 		this.path = path;

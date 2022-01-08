@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
@@ -232,6 +233,19 @@ public class BukkitCore extends JavaPlugin implements ICore {
 	
 	@Override
 	public void runCommand(String command) {
+		List<String> whitelistedCommands = instance.config().getWhitelistedCommands();
+		boolean blacklist = instance.config().isUseBlacklist();
+		if(whitelistedCommands!=null){
+			boolean startwith = false;
+			for(String whitelistedCommand : whitelistedCommands){
+				if(command.startsWith(whitelistedCommand)) {
+					startwith = true;
+				}
+			}
+			if(blacklist==startwith){
+				return;
+			}
+		}
 		getServer().getScheduler().runTask(this, () -> {
 			getServer().dispatchCommand(getServer().getConsoleSender(), command);
 		});
