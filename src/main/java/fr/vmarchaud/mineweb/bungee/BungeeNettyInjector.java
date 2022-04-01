@@ -37,6 +37,7 @@ import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class BungeeNettyInjector extends NettyInjector {
@@ -55,7 +56,19 @@ public class BungeeNettyInjector extends NettyInjector {
 			// get the field that will setup the channel and inject our handler
 			Class<PipelineUtils> server = PipelineUtils.class;
 			Field field = server.getDeclaredField("SERVER_CHILD");
-			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			//Field modifiersField = Field.class.getDeclaredField("modifiers");
+
+			Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
+			getDeclaredFields0.setAccessible(true);
+			Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
+			Field modifiersField = null;
+			for (Field each : fields) {
+				if ("modifiers".equals(each.getName())) {
+					modifiersField = each;
+					break;
+				}
+			}
+			assert modifiersField != null;
 			field.setAccessible(true);
 			modifiersField.setAccessible(true);
 			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
