@@ -33,7 +33,7 @@ public class BungeeGetMaxPlayers implements IMethod {
 
 	@Override
 	public Object execute(ICore instance, Object... inputs) {
-		return ((ProxyServer)instance.getGameServer()).getConfigurationAdapter().getListeners().iterator().next().getMaxPlayers();
+		return ((ProxyServer)instance.getGameServer()).getConfig().getPlayerLimit();
 	}
 
 }

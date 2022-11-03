@@ -26,6 +26,7 @@ package fr.vmarchaud.mineweb.bungee.methods;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.IMethod;
 import fr.vmarchaud.mineweb.common.MethodHandler;
+import fr.vmarchaud.mineweb.common.configuration.PluginConfiguration;
 import net.md_5.bungee.api.ProxyServer;
 
 @MethodHandler
@@ -33,10 +34,11 @@ public class BungeeGetMOTD implements IMethod {
 
 	@Override
 	public Object execute(ICore instance, Object... inputs) {
-		if (instance.config().getMotd() == null || instance.config().getMotd().length() == 0)
+		PluginConfiguration config = instance.config();
+		if (config.getMotd() == null || config.getMotd().length() == 0)
 			return ((ProxyServer) instance.getGameServer()).getConfigurationAdapter().getListeners().iterator().next()
 					.getMotd();
-		return instance.config().getMotd();
+		return config.getMotd();
 	}
 
 }
