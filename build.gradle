@@ -14,7 +14,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'eclipse'
 
 group = 'fr.vmarchaud'
-version = '3.0.8'
+version = '3.0.9'
 
 description = "mineweb_bridge"
 
@@ -45,7 +45,10 @@ dependencies {
     compileOnly "org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT"
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
-	compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.43.Final'
+	implementation (group: "io.netty", name: "netty-codec-http", version: '4.1.82.Final') {
+		exclude group: "io.netty"
+	}
+	//compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.82.Final'
 	compileOnly fileTree(include: ['*.jar'], dir: 'dependencies')
 }
 
