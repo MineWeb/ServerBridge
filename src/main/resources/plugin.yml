@@ -1,6 +1,6 @@
 name: MinewebBridge
 main: fr.vmarchaud.mineweb.bukkit.BukkitCore
-version: 3.0.9
+version: 3.0.10
 api-version: 1.15
 authors:
   - ThisIsMac
