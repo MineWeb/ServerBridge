@@ -14,7 +14,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'eclipse'
 
 group = 'fr.vmarchaud'
-version = '3.0.9'
+version = '3.0.10'
 
 description = "mineweb_bridge"
 
@@ -35,7 +35,7 @@ repositories {
 dependencies {
 	compileOnly 'com.google.guava:guava:31.1-jre'
 	compileOnly 'com.google.code.gson:gson:2.9.0'
-	compileOnly ("com.comphenix.protocol:ProtocolLib:4.5.1") {
+	compileOnly ("com.comphenix.protocol:ProtocolLib:5.0.0") {
 		exclude group: "com.comphenix.executors"
 		// For
 		exclude group: "cglib"
