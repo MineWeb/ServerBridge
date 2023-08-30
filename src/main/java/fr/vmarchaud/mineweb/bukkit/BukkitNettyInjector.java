@@ -32,10 +32,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import com.comphenix.protocol.reflect.FuzzyReflection;
-import com.comphenix.protocol.reflect.VolatileField;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.google.common.collect.Lists;
 
+import fr.vmarchaud.mineweb.bukkit.dump.VolatileField;
 import fr.vmarchaud.mineweb.common.ICore;
 import fr.vmarchaud.mineweb.common.injector.JSONAPIChannelDecoder;
 import fr.vmarchaud.mineweb.common.injector.NettyInjector;
@@ -68,7 +68,7 @@ public class BukkitNettyInjector extends NettyInjector {
             throw new IllegalStateException("Cannot inject twice.");
         try {
             FuzzyReflection fuzzyServer = FuzzyReflection.fromClass(MinecraftReflection.getMinecraftServerClass());
-            Method serverConnectionMethod = fuzzyServer.getMethodByParameters("getServerConnection", MinecraftReflection.getServerConnectionClass(), new Class[] {});
+            Method serverConnectionMethod = fuzzyServer.getMethodByReturnTypeAndParameters("getServerConnection", MinecraftReflection.getServerConnectionClass());
             
             // Get the server connection
             Object server = fuzzyServer.getSingleton();
@@ -191,7 +191,7 @@ public class BukkitNettyInjector extends NettyInjector {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) volatileField.getValue();
             
-            if (list.size() == 0 || list.get(0) instanceof ChannelFuture) {
+            if (list.isEmpty() || list.get(0) instanceof ChannelFuture) {
                 result.add(volatileField);
             }
         }
