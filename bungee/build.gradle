@@ -1,0 +1,17 @@
+apply plugin: "java"
+apply plugin: "com.github.johnrengelman.shadow"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    implementation project(":core")
+    compileOnly "net.md-5:bungeecord-api:1.21-R0.4-SNAPSHOT"
+    compileOnly "net.md-5:bungeecord-proxy:1.4.7-SNAPSHOT"
+    compileOnly "io.netty:netty-all:4.2.5.Final"
+}
+
+shadowJar {
+    archiveBaseName.set("mineweb_bridge-bungee")
+    archiveVersion.set(project.version.toString())
+}

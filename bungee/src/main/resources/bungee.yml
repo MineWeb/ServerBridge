@@ -1,0 +1,7 @@
+name: MinewebBridge
+main: fr.vmarchaud.mineweb.bridge.bungee.BungeeBridgePlugin
+version: 4.0.0
+authors:
+  - ThisIsMac
+  - Shyrogan
+  - nivcoo

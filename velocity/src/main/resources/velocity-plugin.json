@@ -1,0 +1,12 @@
+{
+  "id": "minewebbridge",
+  "name": "MineWebBridge",
+  "version": "4.0.0",
+  "description": "MineWeb bridge plugin for Bukkit, Bungee and Velocity",
+  "authors": [
+    "ThisIsMac",
+    "Shyrogan",
+    "nivcoo"
+  ],
+  "main": "fr.vmarchaud.mineweb.bridge.velocity.VelocityBridgePlugin"
+}

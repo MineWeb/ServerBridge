@@ -1,1 +1,2 @@
-rootProject.name = 'mineweb_bridge'
+rootProject.name = "mineweb_bridge"
+include "core", "bukkit", "bungee", "velocity"

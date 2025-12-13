@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 buildscript {
 	repositories {
 		maven {
@@ -5,59 +7,37 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+		classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
 	}
 }
 
-apply plugin: 'java'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'eclipse'
+allprojects {
+	group = "fr.vmarchaud"
+	version = "4.0.0"
 
-group = 'fr.vmarchaud'
-version = '3.0.10'
-
-description = "mineweb_bridge"
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-repositories {
-	mavenLocal()
-    maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
-    maven { url "https://repo.dmulloy2.net/content/groups/public/" }
-	maven { url 'https://repo.spongepowered.org/maven' }
-	mavenCentral()
-	flatDir {
-		dirs 'dependencies'
+	repositories {
+		mavenLocal()
+		maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
+		maven { url "https://repo.dmulloy2.net/content/groups/public/" }
+		maven { url "https://nexus.velocitypowered.com/repository/maven-public/" }
+		mavenCentral()
+		flatDir {
+			dirs "dependencies"
+		}
 	}
 }
 
-dependencies {
-	compileOnly 'com.google.guava:guava:31.1-jre'
-	compileOnly 'com.google.code.gson:gson:2.9.0'
-	compileOnly ("com.comphenix.protocol:ProtocolLib:5.0.0") {
-		exclude group: "com.comphenix.executors"
-		// For
-		exclude group: "cglib"
-	}
-	implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
-	compileOnly 'org.spongepowered:spongeapi:7.1.0'
-    compileOnly "org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT"
-	compileOnly 'org.projectlombok:lombok:1.18.22'
-	annotationProcessor 'org.projectlombok:lombok:1.18.22'
-	implementation (group: "io.netty", name: "netty-codec-http", version: '4.1.82.Final') {
-		exclude group: "io.netty"
-	}
-	//compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.82.Final'
-	compileOnly fileTree(include: ['*.jar'], dir: 'dependencies')
-}
+def outputDir = file("$rootDir/output")
 
-task moveIntoBukkit(type: Copy) {
-	from "build/libs/mineweb_bridge-${version}.jar"
-	into '../_SERVER/plugins/'
-}
-
-task moveIntoBungee(type: Copy) {
-	from "build/libs/mineweb_bridge-${version}.jar"
-	into '../_BUNGEE/plugins/'
+subprojects {
+	plugins.withId("com.github.johnrengelman.shadow") {
+		tasks.withType(ShadowJar).configureEach { shadowTask ->
+			doLast {
+				copy {
+					from shadowTask.archiveFile.get().asFile
+					into outputDir
+				}
+			}
+		}
+	}
 }

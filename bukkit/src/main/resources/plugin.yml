@@ -1,0 +1,26 @@
+name: MinewebBridge
+main: fr.vmarchaud.mineweb.bridge.bukkit.BukkitBridgePlugin
+version: 4.0.0
+api-version: 1.15
+authors:
+  - ThisIsMac
+  - Shyrogan
+  - nivcoo
+softdepend:
+  - ProtocolLib
+load: STARTUP
+commands:
+  mineweb:
+    description: Commands to manage MineWebBridge
+    usage: |
+      Use /help mineweb [subcommand] for more information
+      /mineweb reset - Reset the link
+      /mineweb port <port> - Setup custom port
+  mineweb reset:
+    description: Reset plugin configuration
+    usage: /mineweb reset
+    permission: mineweb.reset
+  mineweb port:
+    description: Setup custom port
+    usage: /mineweb port <port>
+    permission: mineweb.port
